@@ -285,6 +285,7 @@ export default function SettingsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="facebook">Facebook</Label>
+                  
                   <Input
                     id="facebook"
                     value={artisan.socialMedia.facebook}
