@@ -1,38 +1,45 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
-import { AlertCircle } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const router = useRouter()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError("")
+    e.preventDefault();
+    setError("");
 
-    // Here you would typically send a request to your authentication API
     try {
-      // Simulating an API call
-      if (email === "user@example.com" && password === "password") {
-        // Successful login
-        router.push("/")
-      } else {
-        throw new Error("Invalid credentials")
-      }
+      console.log('Attempting login with:', { email});
+      const response = await axios.post("http://localhost:3001/api/login", {
+        email,
+        password
+      });
+      
+      console.log('Login response:', response.data);
+      
+      // Store the token in localStorage
+      localStorage.setItem('token', response.data.token);
+      
+      // Redirect to home page
+      router.push('/');
+    
     } catch (err) {
-      setError("Invalid email or password. Please try again.")
-    }
-  }
+      console.error('Login error:', err.response?.data || err.message);
+      setError(err.response?.data?.message || "Invalid email or password. Please try again.");
+    }}
 
   return (
     <div className="min-h-screen bg-pearl flex items-center justify-center">
@@ -87,6 +94,5 @@ export default function LoginPage() {
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
-
