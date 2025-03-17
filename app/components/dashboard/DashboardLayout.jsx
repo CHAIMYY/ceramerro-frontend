@@ -33,7 +33,7 @@ export default function DashboardLayout({ children, role }) {
           <div className="p-6">
             <Link href="/" className="flex items-center space-x-2">
               <Home className="w-6 h-6" />
-              <span className="font-bold text-xl">{role === "admin" ? "Admin" : "Seller"} Panel</span>
+              <span className="font-bold text-xl">{role === "admin" ? "admin" : "seller"} Panel</span>
             </Link>
           </div>
           <nav className="flex-1 p-4">

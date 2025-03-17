@@ -18,8 +18,8 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      {/* <AuthProvider>
-        <ProductProvider>
+     {/* <AuthProvider>
+         <ProductProvider>
           <CartProvider> */}
             <LanguageProvider>
               <CurrencyProvider>
