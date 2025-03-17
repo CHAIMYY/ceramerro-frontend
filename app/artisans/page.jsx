@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
@@ -8,6 +8,9 @@ import { Instagram, Globe } from "lucide-react"
 
 export default function ArtisansPage() {
   const [activeCategory, setActiveCategory] = useState("all")
+  const [artisans, setArtisans] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   const categories = [
     { id: "all", name: "All Artisans" },
@@ -16,73 +19,67 @@ export default function ArtisansPage() {
     { id: "tableware", name: "Tableware" },
   ]
 
-  const artisans = [
-    {
-      id: 1,
-      name: "Emma Pottery",
-      specialty: "Minimalist Vases",
-      category: "pottery",
-      location: "Brooklyn, NY",
-      image:
-        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-rethaferguson-3817497.jpg-g08fRDNGUnO4iHESPpPuTyvl3LtbdJ.jpeg",
-      featured: true,
-    },
-    {
-      id: 2,
-      name: "Liam Ceramics",
-      specialty: "Rustic Tableware",
-      category: "tableware",
-      location: "Portland, OR",
-      image:
-        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-koolshooters-9736891.jpg-6T8WSg0a53na1FXQGRdPmczWCMkfGH.jpeg",
-      featured: false,
-    },
-    {
-      id: 3,
-      name: "Sophia Clay Works",
-      specialty: "Decorative Sculptures",
-      category: "sculpture",
-      location: "Austin, TX",
-      image:
-        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-koolshooters-9736720.jpg-WAQ8EHL8wibRIMix59YGewjjmeh5vP.jpeg",
-      featured: true,
-    },
-    {
-      id: 4,
-      name: "Noah's Pottery Studio",
-      specialty: "Functional Kitchenware",
-      category: "tableware",
-      location: "Seattle, WA",
-      image:
-        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-pixabay-357428.jpg-E6GCvheFALz0JgBoVkQMy4WZj5QF3y.jpeg",
-      featured: false,
-    },
-    {
-      id: 5,
-      name: "Olivia Ceramic Design",
-      specialty: "Contemporary Vases",
-      category: "pottery",
-      location: "Chicago, IL",
-      image:
-        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-rethaferguson-3817497.jpg-g08fRDNGUnO4iHESPpPuTyvl3LtbdJ.jpeg",
-      featured: false,
-    },
-    {
-      id: 6,
-      name: "Ethan Clay Studio",
-      specialty: "Abstract Sculptures",
-      category: "sculpture",
-      location: "Los Angeles, CA",
-      image:
-        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-koolshooters-9736891.jpg-6T8WSg0a53na1FXQGRdPmczWCMkfGH.jpeg",
-      featured: true,
-    },
-  ]
+  useEffect(() => {
+    const fetchArtisans = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch('http://localhost:3001/api/user/getusers')
+        
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`)
+        }
+        
+        const data = await response.json()
+        
+        // Transform the API data to match our artisan data structure
+        const formattedData = data.map(user => ({
+          id: user._id,
+          name: `${user.firstname} ${user.lastname}`,
+          specialty: user.specialty || "Ceramic Artist",
+          category: user.category || "pottery", // Default category if not specified
+          location: user.location || "Location not specified",
+          image: user.image || "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-rethaferguson-3817497.jpg-g08fRDNGUnO4iHESPpPuTyvl3LtbdJ.jpeg",
+          featured: user.featured || false,
+          socialMedia: user.socialMedia || {},
+          bio: user.bio || "",
+          gallery: user.gallery || []
+        }))
+        
+        setArtisans(formattedData)
+        setLoading(false)
+      } catch (err) {
+        console.error("Error fetching artisans:", err)
+        setError(err.message)
+        setLoading(false)
+        
+        // Fallback to empty array if API fails
+        setArtisans([])
+      }
+    }
+
+    fetchArtisans()
+  }, [])
 
   const filteredArtisans =
     activeCategory === "all" ? artisans : artisans.filter((artisan) => artisan.category === activeCategory)
 
   const featuredArtisans = artisans.filter((artisan) => artisan.featured)
+
+  if (loading) {
+    return (
+      <div className="pt-24 bg-dark-900 min-h-screen flex items-center justify-center">
+        <div className="text-white text-xl">Loading artisans...</div>
+      </div>
+    )
+  }
+
+  if (error && artisans.length === 0) {
+    return (
+      <div className="pt-24 bg-dark-900 min-h-screen flex items-center justify-center">
+        <div className="text-white text-xl">Error loading artisans. Please try again later.</div>
+      </div>
+    )
+  }
 
   return (
     <div className="pt-24 bg-dark-900 min-h-screen">
@@ -115,51 +112,53 @@ export default function ArtisansPage() {
         </div>
       </section>
 
-      {/* Featured Artisans */}
-      <section className="py-20 bg-dark-800">
-        <div className="container mx-auto px-8">
-          <div className="mb-12">
-            <span className="text-accent-green text-sm tracking-wider">MASTER CRAFTSPEOPLE</span>
-            <h2 className="text-3xl font-display text-white mt-2">Featured Artisans</h2>
-          </div>
+      {/* Featured Artisans - Only shown if there are featured artisans */}
+      {featuredArtisans.length > 0 && (
+        <section className="py-20 bg-dark-800">
+          <div className="container mx-auto px-8">
+            <div className="mb-12">
+              <span className="text-accent-green text-sm tracking-wider">MASTER CRAFTSPEOPLE</span>
+              <h2 className="text-3xl font-display text-white mt-2">Featured Artisans</h2>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {featuredArtisans.map((artisan, index) => (
-              <motion.div
-                key={artisan.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="relative group"
-              >
-                <div className="relative h-96 overflow-hidden rounded-lg">
-                  <Image
-                    src={artisan.image || "/placeholder.svg"}
-                    alt={artisan.name}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-dark-900 to-transparent opacity-70" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {featuredArtisans.map((artisan, index) => (
+                <motion.div
+                  key={artisan.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="relative group"
+                >
+                  <div className="relative h-96 overflow-hidden rounded-lg">
+                    <Image
+                      src={artisan.image || "/placeholder.svg"}
+                      alt={artisan.name}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-dark-900 to-transparent opacity-70" />
 
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <h3 className="text-xl font-medium text-white">{artisan.name}</h3>
-                    <p className="text-accent-green mb-2">{artisan.specialty}</p>
-                    <p className="text-white/70 text-sm mb-4">{artisan.location}</p>
+                    <div className="absolute bottom-0 left-0 right-0 p-6">
+                      <h3 className="text-xl font-medium text-white">{artisan.name}</h3>
+                      <p className="text-accent-green mb-2">{artisan.specialty}</p>
+                      <p className="text-white/70 text-sm mb-4">{artisan.location}</p>
 
-                    <Link
-                      href={`/artisans/${artisan.id}`}
-                      className="inline-block bg-dark-800/80 backdrop-blur-sm text-white px-4 py-2 rounded-md hover:bg-accent-green hover:text-dark-900 transition-colors"
-                    >
-                      View Profile
-                    </Link>
+                      <Link
+                        href={`/artisans/${artisan.id}`}
+                        className="inline-block bg-dark-800/80 backdrop-blur-sm text-white px-4 py-2 rounded-md hover:bg-accent-green hover:text-dark-900 transition-colors"
+                      >
+                        View Profile
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* All Artisans */}
       <section className="py-20 bg-dark-900">
@@ -187,49 +186,68 @@ export default function ArtisansPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredArtisans.map((artisan, index) => (
-              <motion.div
-                key={artisan.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.05 }}
-              >
-                <Link href={`/artisans/${artisan.id}`} className="block group">
-                  <div className="bg-dark-800 rounded-lg overflow-hidden">
-                    <div className="relative h-64 overflow-hidden">
-                      <Image
-                        src={artisan.image || "/placeholder.svg"}
-                        alt={artisan.name}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    </div>
-                    <div className="p-6">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="text-lg font-medium text-white">{artisan.name}</h3>
-                          <p className="text-accent-green">{artisan.specialty}</p>
-                        </div>
-                        <div className="flex space-x-2">
-                          <button className="text-white/50 hover:text-white transition-colors">
-                            <Instagram className="w-5 h-5" />
-                          </button>
-                          <button className="text-white/50 hover:text-white transition-colors">
-                            <Globe className="w-5 h-5" />
-                          </button>
-                        </div>
+          {filteredArtisans.length === 0 ? (
+            <div className="text-white text-center py-12">
+              No artisans found in this category.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredArtisans.map((artisan, index) => (
+                <motion.div
+                  key={artisan.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.05 }}
+                >
+                  <Link href={`/artisans/${artisan.id}`} className="block group">
+                    <div className="bg-dark-800 rounded-lg overflow-hidden">
+                      <div className="relative h-64 overflow-hidden">
+                        <Image
+                          src={artisan.image || "/placeholder.svg"}
+                          alt={artisan.name}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
                       </div>
-                      <p className="text-white/70 text-sm mt-4">{artisan.location}</p>
+                      <div className="p-6">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="text-lg font-medium text-white">{artisan.name}</h3>
+                            <p className="text-accent-green">{artisan.specialty}</p>
+                          </div>
+                          <div className="flex space-x-2">
+                            {artisan.socialMedia?.instagram && (
+                              <a 
+                                href={artisan.socialMedia.instagram} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-white/50 hover:text-white transition-colors"
+                              >
+                                <Instagram className="w-5 h-5" />
+                              </a>
+                            )}
+                            {artisan.socialMedia?.website && (
+                              <a 
+                                href={artisan.socialMedia.website} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-white/50 hover:text-white transition-colors"
+                              >
+                                <Globe className="w-5 h-5" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-white/70 text-sm mt-4">{artisan.location}</p>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </div>
   )
 }
-
