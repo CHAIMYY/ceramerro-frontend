@@ -43,6 +43,8 @@ const DashboardLayout = ({ children }) => {
       path: "/seller/setings",
       icon: <Settings className="h-5 w-5" />,
     },
+    
+   
   ];
 
   return (
@@ -87,7 +89,7 @@ const DashboardLayout = ({ children }) => {
             ))}
           </nav>
           <div className="border-t p-4">
-            <div className="flex items-center justify-between mb-4">
+            {/* <div className="flex items-center justify-between mb-4">
               <span className="text-sm font-medium">Theme</span>
               <Button
                 variant="outline"
@@ -96,7 +98,7 @@ const DashboardLayout = ({ children }) => {
               >
                 {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </Button>
-            </div>
+            </div> */}
             <Button variant="outline" className="w-full justify-start" asChild>
               <Link href="/login">
                 <LogOut className="mr-2 h-4 w-4" />
