@@ -1,9 +1,8 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Search, Menu, X } from "lucide-react"
+import { Search, Menu, X, ShoppingCart } from "lucide-react"
 import { useLanguage } from "../contexts/LanguageContext"
 import { useCurrency } from "../contexts/CurrencyContext"
 import { motion, AnimatePresence } from "framer-motion"
@@ -13,13 +12,22 @@ export default function Header() {
   const { currency, setCurrency } = useCurrency()
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50)
     }
 
+    // Check authentication status
+    const checkAuth = () => {
+      const token = localStorage.getItem('token')
+      setIsAuthenticated(!!token)
+    }
+
     window.addEventListener("scroll", handleScroll)
+    checkAuth()
+    
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
@@ -80,10 +88,18 @@ export default function Header() {
             {/* <button aria-label="Search" className="text-white/70 hover:text-white transition-colors duration-300">
               <Search className="w-4 h-4" />
             </button> */}
-               <Link href="/login" className="hover:text-white transition-colors duration-300 relative group py-2">
-                  Login
-                  <span className="absolute bottom-0 left-0 w-full h-px bg-accent-green transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
-                </Link>
+            {isAuthenticated ? (
+              <Link href="/cart" className="hover:text-white transition-colors duration-300 relative group py-2 flex items-center">
+                <ShoppingCart className="w-4 h-4 mr-1" />
+                Cart
+                <span className="absolute bottom-0 left-0 w-full h-px bg-accent-green transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+              </Link>
+            ) : (
+              <Link href="/login" className="hover:text-white transition-colors duration-300 relative group py-2">
+                Login
+                <span className="absolute bottom-0 left-0 w-full h-px bg-accent-green transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+              </Link>
+            )}
             <button
               className="md:hidden text-white/70 hover:text-white transition-colors duration-300"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -159,6 +175,28 @@ export default function Header() {
                     Contact
                   </Link>
                 </li>
+                {isAuthenticated ? (
+                  <li>
+                    <Link
+                      href="/cart"
+                      className="text-white/70 hover:text-white transition-colors duration-300 block py-2 flex items-center"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <ShoppingCart className="w-4 h-4 mr-1" />
+                      Cart
+                    </Link>
+                  </li>
+                ) : (
+                  <li>
+                    <Link
+                      href="/login"
+                      className="text-white/70 hover:text-white transition-colors duration-300 block py-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Login
+                    </Link>
+                  </li>
+                )}
               </ul>
             </nav>
           </motion.div>
@@ -167,5 +205,3 @@ export default function Header() {
     </header>
   )
 }
-
-
