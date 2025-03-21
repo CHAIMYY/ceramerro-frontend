@@ -11,7 +11,6 @@ export default function ShopPage() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [filteredProducts, setFilteredProducts] = useState([])
   const [categories, setCategories] = useState([{ id: "all", name: "All Products" }])
   const [artisans, setArtisans] = useState([])
   const [activeFilters, setActiveFilters] = useState({ category: "all", artisans: [], search: "" })
@@ -36,14 +35,14 @@ export default function ShopPage() {
       
       // Add pagination parameters
       params.append('page', currentPage.toString());
-      params.append('limit', '6');
+      params.append('limit', productsPerPage.toString());
 
       // Add filter parameters
       if (activeFilters.category !== "all") {
         params.append('categorie', activeFilters.category);
       }
       if (activeFilters.artisans.length > 0) {
-        params.append('userId', activeFilters.artisans[0]);
+        params.append('userId', activeFilters.artisans.join(','));
       }
       if (activeFilters.search && activeFilters.search.trim()) {
         params.append('nom', activeFilters.search.trim());
@@ -63,17 +62,20 @@ export default function ShopPage() {
       }));
 
       setProducts(productsWithArtisans);
-      setFilteredProducts(productsWithArtisans);
       setTotalPages(Math.ceil(data.total / productsPerPage));
       setTotalProducts(data.total);
       
-      const uniqueCategories = [...new Set(data.products.map(product => product.categorie))]
-        .filter(category => category)
-        .map(category => ({
-          id: category,
-          name: category.charAt(0).toUpperCase() + category.slice(1)
-        }));
-      setCategories([{ id: "all", name: "All Products" }, ...uniqueCategories]);
+      // Only update categories on first page load or when filters change
+      if (currentPage === 1) {
+        const allProducts = data.allProducts || data.products;
+        const uniqueCategories = [...new Set(allProducts.map(product => product.categorie))]
+          .filter(category => category)
+          .map(category => ({
+            id: category,
+            name: category.charAt(0).toUpperCase() + category.slice(1)
+          }));
+        setCategories([{ id: "all", name: "All Products" }, ...uniqueCategories]);
+      }
 
       setLoading(false);
       setError(null);
@@ -98,7 +100,7 @@ export default function ShopPage() {
         .filter(user => user.role === 'artisan')
         .map(artisan => ({
           id: artisan._id,
-          name: artisan.name || artisan.email
+          name: artisan.fisrtname || artisan.email
         }));
 
       setArtisans(artisansList);
@@ -113,20 +115,33 @@ export default function ShopPage() {
   };
 
   const handleArtisanChange = (artisanId) => {
-    setActiveFilters(prev => ({
-      ...prev,
-      artisans: prev.artisans.includes(artisanId) ? [] : [artisanId]
-    }));
+    setActiveFilters(prev => {
+      const newArtisans = prev.artisans.includes(artisanId)
+        ? prev.artisans.filter(id => id !== artisanId)
+        : [...prev.artisans, artisanId];
+      
+      return {
+        ...prev,
+        artisans: newArtisans
+      };
+    });
     setCurrentPage(1);
   };
 
   const handleSearchChange = (e) => {
-    setActiveFilters(prev => ({ ...prev, search: e.target.value }));
+    const value = e.target.value;
+    setActiveFilters(prev => ({ ...prev, search: value }));
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
     setCurrentPage(1);
+    fetchProducts();
   };
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSortChange = (e) => {
@@ -140,7 +155,7 @@ export default function ShopPage() {
       <section className="relative h-[40vh] flex items-center">
         <div className="absolute inset-0 z-0">
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-pixabay-357428.jpg-E6GCvheFALz0JgBoVkQMy4WZj5QF3y.jpeg"
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-koolshooters-9736720.jpg-WAQ8EHL8wibRIMix59YGewjjmeh5vP.jpeg"
             alt="Shop banner"
             fill
             className="object-cover"
@@ -160,7 +175,7 @@ export default function ShopPage() {
             <p className="text-white/70 text-lg mb-8">
               Discover our handcrafted ceramic pieces, each one unique and made with care by our skilled artisans.
             </p>
-            <div className="relative max-w-md">
+            <form onSubmit={handleSearchSubmit} className="relative max-w-md">
               <input
                 type="text"
                 placeholder="Search for products..."
@@ -168,8 +183,10 @@ export default function ShopPage() {
                 onChange={handleSearchChange}
                 className="w-full bg-dark-800/80 backdrop-blur-sm border border-dark-700 text-white px-4 py-3 pl-10 rounded-md focus:outline-none focus:border-accent-green"
               />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/50" />
-            </div>
+              <button type="submit" className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                <Search className="w-5 h-5 text-white/50" />
+              </button>
+            </form>
           </motion.div>
         </div>
       </section>
@@ -217,13 +234,31 @@ export default function ShopPage() {
                     ))}
                   </div>
                 </div>
+
+                {(activeFilters.category !== "all" || activeFilters.artisans.length > 0 || activeFilters.search) && (
+                  <div className="mt-8">
+                    <button
+                      onClick={() => {
+                        setActiveFilters({ category: "all", artisans: [], search: "" });
+                        setCurrentPage(1);
+                      }}
+                      className="w-full py-2 px-4 bg-dark-700 text-white rounded-md hover:bg-dark-600 transition-colors"
+                    >
+                      Clear All Filters
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Products Grid */}
             <div className="flex-grow">
               <div className="flex justify-between items-center mb-8">
-                <h2 className="text-2xl font-display text-white">All Products</h2>
+                <h2 className="text-2xl font-display text-white">
+                  {activeFilters.category !== "all" 
+                    ? categories.find(c => c.id === activeFilters.category)?.name || "Products" 
+                    : "All Products"}
+                </h2>
                 <div className="flex items-center space-x-4">
                   <div className="relative">
                     <select 
@@ -240,15 +275,77 @@ export default function ShopPage() {
                 </div>
               </div>
 
+              {/* Active filters summary */}
+              {(activeFilters.category !== "all" || activeFilters.artisans.length > 0 || activeFilters.search) && (
+                <div className="mb-6 flex flex-wrap gap-2 items-center">
+                  <span className="text-white/70">Active filters:</span>
+                  
+                  {activeFilters.category !== "all" && (
+                    <span className="bg-dark-800 text-white px-3 py-1 rounded-full text-sm flex items-center">
+                      Category: {categories.find(c => c.id === activeFilters.category)?.name}
+                      <button 
+                        onClick={() => handleCategoryChange("all")}
+                        className="ml-2 text-white/70 hover:text-white"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  
+                  {activeFilters.artisans.map(artisanId => {
+                    const artisan = artisans.find(a => a.id === artisanId);
+                    return artisan ? (
+                      <span key={artisanId} className="bg-dark-800 text-white px-3 py-1 rounded-full text-sm flex items-center">
+                        Artisan: {artisan.name}
+                        <button 
+                          onClick={() => handleArtisanChange(artisanId)}
+                          className="ml-2 text-white/70 hover:text-white"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ) : null;
+                  })}
+                  
+                  {activeFilters.search && (
+                    <span className="bg-dark-800 text-white px-3 py-1 rounded-full text-sm flex items-center">
+                      Search: {activeFilters.search}
+                      <button 
+                        onClick={() => {
+                          setActiveFilters(prev => ({ ...prev, search: "" }));
+                          setCurrentPage(1);
+                        }}
+                        className="ml-2 text-white/70 hover:text-white"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {loading ? (
-                  <p className="text-white col-span-3 text-center">Loading products...</p>
+                  Array(6).fill(0).map((_, index) => (
+                    <div key={index} className="bg-dark-800 rounded-lg p-4 animate-pulse h-64"></div>
+                  ))
                 ) : error ? (
                   <p className="text-red-500 col-span-3 text-center">{error}</p>
-                ) : filteredProducts.length === 0 ? (
-                  <p className="text-white col-span-3 text-center">No products found</p>
+                ) : products.length === 0 ? (
+                  <div className="col-span-3 text-center py-12">
+                    <p className="text-white text-lg mb-4">No products found matching your criteria</p>
+                    <button
+                      onClick={() => {
+                        setActiveFilters({ category: "all", artisans: [], search: "" });
+                        setCurrentPage(1);
+                      }}
+                      className="px-4 py-2 bg-accent-green text-dark-900 rounded-md"
+                    >
+                      Clear All Filters
+                    </button>
+                  </div>
                 ) : (
-                  filteredProducts.map((product) => (
+                  products.map((product) => (
                     <motion.div
                       key={product._id}
                       initial={{ opacity: 0, y: 20 }}
