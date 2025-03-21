@@ -15,7 +15,7 @@ export function middleware(request) {
   const isAuthRoute = path.startsWith('/login') || path.startsWith('/register')
 
   // Handle protected routes
-  if (isSellerRoute || isAdminRoute) {
+  if (isAdminRoute) {
     if (!token) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
@@ -35,7 +35,7 @@ export function middleware(request) {
     if (userType === 'admin') {
       return NextResponse.redirect(new URL('/admin', request.url))
     }
-    return NextResponse.redirect(new URL('/seller', request.url))
+    return NextResponse.redirect(new URL('/shop', request.url))
   }
 
   return NextResponse.next()
