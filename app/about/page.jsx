@@ -2,8 +2,54 @@
 
 import { motion } from "framer-motion"
 import Image from "next/image"
+import { useState, useEffect } from "react"
 
 export default function AboutPage() {
+  const [artisans, setArtisans] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null);
+
+useEffect(() => {
+    const fetchArtisans = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch('http://localhost:3001/api/user/getusers')
+        
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`)
+        }
+        
+        const data = await response.json()
+        
+        // Transform the API data to match our artisan data structure
+        const formattedData = data.map(user => ({
+          id: user._id,
+          name: `${user.firstname} ${user.lastname}`,
+          specialty: user.specialty || "Ceramic Artist",
+          category: user.category || "pottery", // Default category if not specified
+          location: user.location || "Location not specified",
+          image: user.image || "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-rethaferguson-3817497.jpg-g08fRDNGUnO4iHESPpPuTyvl3LtbdJ.jpeg",
+          featured: user.featured || false,
+          socialMedia: user.socialMedia || {},
+          bio: user.bio || "",
+          gallery: user.gallery || []
+        }))
+        
+        setArtisans(formattedData)
+        setLoading(false)
+      } catch (err) {
+        console.error("Error fetching artisans:", err)
+        setError(err.message)
+        setLoading(false)
+        
+        // Fallback to empty array if API fails
+        setArtisans([])
+      }
+    }
+
+    fetchArtisans()
+  }, [])
+
   return (
     <div className="pt-24 bg-dark-900">
       {/* Hero Section */}
@@ -143,34 +189,9 @@ export default function AboutPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {[
-              {
-                name: "Elena Kim",
-                role: "Founder & Lead Designer",
-                image:
-                  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-rethaferguson-3817497.jpg-g08fRDNGUnO4iHESPpPuTyvl3LtbdJ.jpeg",
-              },
-              {
-                name: "Marcus Chen",
-                role: "Master Potter",
-                image:
-                  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-koolshooters-9736891.jpg-6T8WSg0a53na1FXQGRdPmczWCMkfGH.jpeg",
-              },
-              {
-                name: "Sophia Rodriguez",
-                role: "Glaze Specialist",
-                image:
-                  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-koolshooters-9736720.jpg-WAQ8EHL8wibRIMix59YGewjjmeh5vP.jpeg",
-              },
-              {
-                name: "James Wilson",
-                role: "Production Manager",
-                image:
-                  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-pixabay-357428.jpg-E6GCvheFALz0JgBoVkQMy4WZj5QF3y.jpeg",
-              },
-            ].map((member, index) => (
+            {artisans.map((artisan, index) => (
               <motion.div
-                key={index}
+               key={artisan.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -179,15 +200,15 @@ export default function AboutPage() {
               >
                 <div className="relative h-80 mb-4 overflow-hidden rounded-lg">
                   <Image
-                    src={member.image || "/placeholder.svg"}
-                    alt={member.name}
+                     src={artisan.image || "/placeholder.svg"}
+                     alt={artisan.name}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-dark-900/10 group-hover:bg-dark-900/30 transition-colors duration-300" />
                 </div>
-                <h3 className="text-lg font-medium text-white">{member.name}</h3>
-                <p className="text-accent-green">{member.role}</p>
+                <h3 className="text-lg font-medium text-white">{artisan.name}</h3>
+                <p className="text-accent-green">{artisan.specialty}</p>
               </motion.div>
             ))}
           </div>
