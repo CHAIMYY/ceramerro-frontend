@@ -54,11 +54,12 @@ export default function LoginPage() {
         if (response.data.userType === 'admin') {
           console.log('Redirecting to admin dashboard');
           // router.replace('/admin');
-          router.replace('/artisans');
+          router.push('/admin');
         } else if (response.data.userType === 'client') {
           console.log('Redirecting to shop');
-          router.replace('/shop');
-        } else {
+          router.push('/shop');
+        } 
+        else {
           // Default to artisan/seller
           console.log('Redirecting to seller dashboard');
           router.push('/seller');
