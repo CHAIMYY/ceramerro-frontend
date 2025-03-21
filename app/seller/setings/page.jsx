@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -10,50 +10,143 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { PlusCircle, Trash2, Upload, X } from "lucide-react"
 import Image from "next/image"
+import axios from "axios"
+import { toast } from "@/components/ui/use-toast" // Assuming you have toast component from shadcn/ui
+
+// API service for profile-related operations
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/artisan';
+
+// Set auth token for requests
+const setAuthToken = (token) => {
+  if (token) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } else {
+    delete axios.defaults.headers.common['Authorization'];
+  }
+};
+
+// Get user profile
+const getProfile = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/profile`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching profile:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Update user profile
+const updateProfile = async (profileData) => {
+  try {
+    const response = await axios.put(`${API_URL}/updateProfile`, profileData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating profile:', error.response?.data || error.message);
+    throw error;
+  }
+};
 
 export default function SettingsPage() {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [artisan, setArtisan] = useState({
-    name: "Maria Rodriguez",
-    specialty: "Handcrafted Ceramics",
-    bio: "I've been creating pottery for over 15 years, specializing in functional pieces with unique glazes. My work is inspired by natural landscapes and traditional techniques from my hometown.",
-    location: "Portland, Oregon",
+    firstname: "",
+    lastname: "",
+    specialty: "",
+    bio: "",
+    location: "",
     image: "/placeholder.svg?height=200&width=200",
-    gallery: [
-      "/placeholder.svg?height=100&width=100",
-      "/placeholder.svg?height=100&width=100",
-      "/placeholder.svg?height=100&width=100",
-    ],
-    category: "pottery",
-    featured: true,
+    gallery: [],
+    category: "",
+    featured: false,
     socialMedia: {
-      instagram: "@mariaceramics",
-      website: "www.mariaceramics.com",
-      facebook: "mariaceramics",
-      twitter: "@maria_ceramics",
+      instagram: "",
+      website: "",
+      facebook: "",
+      twitter: "",
     },
-    process: [
-      {
-        title: "Clay Selection",
-        description: "I carefully select locally sourced clay that's perfect for functional pieces.",
-      },
-      {
-        title: "Wheel Throwing",
-        description: "Each piece is hand-thrown on my pottery wheel, ensuring unique characteristics.",
-      },
-    ],
-  })
-
+    process: []
+  });
+  
   const [newProcess, setNewProcess] = useState({
     title: "",
     description: "",
-  })
+  });
+
+  // Fetch profile data on component mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        // Get token from localStorage
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setError("Authentication required");
+          setLoading(false);
+          return;
+        }
+        
+        // Set token in axios headers
+        setAuthToken(token);
+        
+        // Fetch profile data
+        const data = await getProfile();
+        
+        if (data.user) {
+          // Transform backend data model to frontend model if needed
+          const profileData = {
+            firstname: data.user.firstname || "",
+            lastname: data.user.lastname || "",
+            name: `${data.user.firstname || ""} ${data.user.lastname || ""}`.trim(),
+            specialty: data.user.specialty || "",
+            bio: data.user.bio || "",
+            location: data.user.location || "",
+            image: data.user.image || "/placeholder.svg?height=200&width=200",
+            gallery: data.user.gallery || [],
+            category: data.user.category || "",
+            featured: data.user.featured || false,
+            socialMedia: {
+              instagram: data.user.socialMedia?.instagram || "",
+              website: data.user.socialMedia?.website || "",
+              facebook: data.user.socialMedia?.facebook || "",
+              twitter: data.user.socialMedia?.twitter || "",
+            },
+            process: data.user.process || []
+          };
+          
+          setArtisan(profileData);
+        }
+      } catch (err) {
+        setError("Failed to load profile. Please try again later.");
+        console.error("Profile fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProfile();
+  }, []);
 
   const handleChange = (field, value) => {
-    setArtisan({
-      ...artisan,
-      [field]: value,
-    })
-  }
+    // Handle name field specially
+    if (field === "name") {
+      const nameParts = value.split(" ");
+      const firstname = nameParts[0] || "";
+      const lastname = nameParts.slice(1).join(" ") || "";
+      
+      setArtisan({
+        ...artisan,
+        name: value,
+        firstname,
+        lastname
+      });
+    } else {
+      setArtisan({
+        ...artisan,
+        [field]: value,
+      });
+    }
+  };
 
   const handleSocialMediaChange = (platform, value) => {
     setArtisan({
@@ -62,50 +155,130 @@ export default function SettingsPage() {
         ...artisan.socialMedia,
         [platform]: value,
       },
-    })
-  }
+    });
+  };
 
   const addProcess = () => {
     if (newProcess.title && newProcess.description) {
       setArtisan({
         ...artisan,
-        process: [...artisan.process, { ...newProcess }],
-      })
-      setNewProcess({ title: "", description: "" })
+        process: [...(artisan.process || []), { ...newProcess }],
+      });
+      setNewProcess({ title: "", description: "" });
     }
-  }
+  };
 
   const removeProcess = (index) => {
-    const updatedProcess = [...artisan.process]
-    updatedProcess.splice(index, 1)
+    const updatedProcess = [...artisan.process];
+    updatedProcess.splice(index, 1);
     setArtisan({
       ...artisan,
       process: updatedProcess,
-    })
-  }
+    });
+  };
 
   const removeGalleryImage = (index) => {
-    const updatedGallery = [...artisan.gallery]
-    updatedGallery.splice(index, 1)
+    const updatedGallery = [...artisan.gallery];
+    updatedGallery.splice(index, 1);
     setArtisan({
       ...artisan,
       gallery: updatedGallery,
-    })
-  }
+    });
+  };
 
   const addGalleryImage = () => {
     // In a real app, this would upload an image
     setArtisan({
       ...artisan,
       gallery: [...artisan.gallery, "/placeholder.svg?height=100&width=100"],
-    })
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      // Prepare data for API
+      const profileData = {
+        firstname: artisan.firstname,
+        lastname: artisan.lastname,
+        email: artisan.email, // If your form collects email
+        bio: artisan.bio,
+        location: artisan.location,
+        specialty: artisan.specialty,
+        category: artisan.category,
+        featured: artisan.featured,
+        socialMedia: artisan.socialMedia,
+        image: artisan.image,
+        gallery: artisan.gallery,
+        process: artisan.process
+      };
+      
+      // Send data to API
+      const result = await updateProfile(profileData);
+      
+      // Show success message
+      if (typeof toast !== 'undefined') {
+        toast({
+          title: "Success",
+          description: "Profile updated successfully!",
+          duration: 3000
+        });
+      } else {
+        alert("Profile updated successfully!");
+      }
+      
+      console.log("Profile updated:", result);
+    } catch (err) {
+      console.error("Error updating profile:", err);
+      
+      // Show error message
+      if (typeof toast !== 'undefined') {
+        toast({
+          title: "Error",
+          description: "Failed to update profile. Please try again.",
+          variant: "destructive",
+          duration: 3000
+        });
+      } else {
+        alert("Failed to update profile. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Loading state
+  if (loading && !artisan.name) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading profile...</p>
+        </div>
+      </div>
+    );
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // In a real app, this would send the data to the server
-    console.log("Saving profile:", artisan)
-    alert("Profile updated successfully!")
+  // Error state
+  if (error && !artisan.name) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="bg-destructive/10 text-destructive p-4 rounded-lg">
+            <p>{error}</p>
+            <Button 
+              onClick={() => window.location.reload()} 
+              variant="outline" 
+              className="mt-4"
+            >
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -223,7 +396,7 @@ export default function SettingsPage() {
             <CardContent>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {artisan.gallery.map((image, index) => (
+                  {artisan.gallery && artisan.gallery.map((image, index) => (
                     <div key={index} className="relative group">
                       <div className="aspect-square relative rounded-md overflow-hidden border border-border">
                         <Image
@@ -269,7 +442,7 @@ export default function SettingsPage() {
                   <Label htmlFor="instagram">Instagram</Label>
                   <Input
                     id="instagram"
-                    value={artisan.socialMedia.instagram}
+                    value={artisan.socialMedia?.instagram || ""}
                     onChange={(e) => handleSocialMediaChange("instagram", e.target.value)}
                     placeholder="@username"
                   />
@@ -278,17 +451,16 @@ export default function SettingsPage() {
                   <Label htmlFor="twitter">Twitter</Label>
                   <Input
                     id="twitter"
-                    value={artisan.socialMedia.twitter}
+                    value={artisan.socialMedia?.twitter || ""}
                     onChange={(e) => handleSocialMediaChange("twitter", e.target.value)}
                     placeholder="@username"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="facebook">Facebook</Label>
-                  
                   <Input
                     id="facebook"
-                    value={artisan.socialMedia.facebook}
+                    value={artisan.socialMedia?.facebook || ""}
                     onChange={(e) => handleSocialMediaChange("facebook", e.target.value)}
                     placeholder="username or page name"
                   />
@@ -297,7 +469,7 @@ export default function SettingsPage() {
                   <Label htmlFor="website">Website</Label>
                   <Input
                     id="website"
-                    value={artisan.socialMedia.website}
+                    value={artisan.socialMedia?.website || ""}
                     onChange={(e) => handleSocialMediaChange("website", e.target.value)}
                     placeholder="www.example.com"
                   />
@@ -306,66 +478,9 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          {/* Process */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Creation Process</CardTitle>
-              <CardDescription>Share your creative process with customers</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {artisan.process.map((step, index) => (
-                <div key={index} className="p-4 border rounded-md relative group">
-                  <button
-                    type="button"
-                    onClick={() => removeProcess(index)}
-                    className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                  <div className="space-y-2">
-                    <h3 className="font-medium">{step.title}</h3>
-                    <p className="text-sm text-muted-foreground">{step.description}</p>
-                  </div>
-                </div>
-              ))}
-
-              <div className="border rounded-md p-4 space-y-4">
-                <h3 className="font-medium">Add New Process Step</h3>
-                <div className="space-y-2">
-                  <Label htmlFor="process-title">Step Title</Label>
-                  <Input
-                    id="process-title"
-                    value={newProcess.title}
-                    onChange={(e) => setNewProcess({ ...newProcess, title: e.target.value })}
-                    placeholder="e.g., Clay Preparation"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="process-description">Step Description</Label>
-                  <Textarea
-                    id="process-description"
-                    value={newProcess.description}
-                    onChange={(e) => setNewProcess({ ...newProcess, description: e.target.value })}
-                    placeholder="Describe this step of your creation process..."
-                    rows={2}
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={addProcess}
-                  disabled={!newProcess.title || !newProcess.description}
-                >
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Add Step
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
           <div className="flex justify-end">
-            <Button type="submit" size="lg">
-              Save Profile
+            <Button type="submit" size="lg" disabled={loading}>
+              {loading ? "Saving..." : "Save Profile"}
             </Button>
           </div>
         </div>
@@ -373,4 +488,3 @@ export default function SettingsPage() {
     </div>
   )
 }
-
