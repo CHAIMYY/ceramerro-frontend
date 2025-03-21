@@ -211,18 +211,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Map Section */}
-      <section className="py-16 bg-dark-800">
-        <div className="container mx-auto px-8">
-          <h2 className="text-3xl font-display text-white mb-8 text-center">Find Us</h2>
-          <div className="h-96 bg-dark-700 rounded-lg overflow-hidden">
-            {/* This would be replaced with an actual map component */}
-            <div className="w-full h-full flex items-center justify-center">
-              <p className="text-white/50">Interactive Map Would Be Here</p>
-            </div>
-          </div>
-        </div>
-      </section>
+    
     </div>
   )
 }
