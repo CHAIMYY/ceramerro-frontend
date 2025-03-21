@@ -1,52 +1,96 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, CreditCard } from "lucide-react"
+import axios from "axios"
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "Handcrafted Ceramic Vase",
-      price: 129.99,
-      quantity: 1,
-      image:
-        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-rethaferguson-3817497.jpg-g08fRDNGUnO4iHESPpPuTyvl3LtbdJ.jpeg",
-    },
-    {
-      id: 2,
-      name: "Ceramic Dinner Plate Set",
-      price: 89.99,
-      quantity: 2,
-      image:
-        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-koolshooters-9736720.jpg-WAQ8EHL8wibRIMix59YGewjjmeh5vP.jpeg",
-    },
-  ])
-
-  const [orderInfo, setOrderInfo] = useState({
-    name: "",
-    email: "",
-    address: "",
-    city: "",
-    country: "",
-    zipCode: "",
-    paymentMethod: "credit_card",
-  })
-
-  const [showOrderForm, setShowOrderForm] = useState(false)
+  const [cartItems, setCartItems] = useState([])
+  const [loading, setLoading] = useState(true)
   const [isProcessing, setIsProcessing] = useState(false)
   const [orderSuccess, setOrderSuccess] = useState(false)
+  const [error, setError] = useState("")
 
-  const updateQuantity = (id, newQuantity) => {
-    if (newQuantity < 1) return
-    setCartItems(cartItems.map((item) => (item.id === id ? { ...item, quantity: newQuantity } : item)))
+  // Get token from localStorage
+  const getToken = () => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("token")
+    }
+    return null
   }
 
-  const removeItem = (id) => {
-    setCartItems(cartItems.filter((item) => item.id !== id))
+  // Create axios instance with auth header
+  const api = axios.create({
+    baseURL: "http://localhost:3001/api",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+
+  // Add auth token to every request
+  api.interceptors.request.use((config) => {
+    const token = getToken()
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  })
+
+  useEffect(() => {
+    fetchCart()
+  }, [])
+
+  const fetchCart = async () => {
+    try {
+      setLoading(true)
+      const response = await api.get("/cart/")
+      setCartItems(response.data)
+      setError("")
+    } catch (error) {
+      console.error("Failed to fetch cart:", error)
+      if (error.response && error.response.status === 401) {
+        setError("Please log in to view your cart")
+      } else {
+        setError("Failed to load your cart. Please try again.")
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const updateQuantity = async (id, newQuantity) => {
+    if (newQuantity < 1) return
+
+    try {
+      const response = await api.put("/cart/update", {
+        productId: id,
+        quantity: newQuantity,
+      })
+
+      setCartItems(response.data)
+      setError("")
+    } catch (error) {
+      console.error("Failed to update quantity:", error)
+      if (error.response && error.response.data.message) {
+        setError(error.response.data.message)
+      } else {
+        setError("Failed to update quantity. Please try again.")
+      }
+    }
+  }
+
+  const removeItem = async (id) => {
+    try {
+      const response = await api.delete(`/cart/remove/${id}`)
+      setCartItems(response.data)
+      setError("")
+    } catch (error) {
+      console.error("Failed to remove item:", error)
+      setError("Failed to remove item. Please try again.")
+    }
   }
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
@@ -54,26 +98,39 @@ export default function CartPage() {
   const tax = subtotal * 0.08
   const total = subtotal + shipping + tax
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setOrderInfo((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handlePlaceOrder = () => {
-    setShowOrderForm(true)
-  }
-
-  const handleSubmitOrder = (e) => {
-    e.preventDefault()
+  const handlePlaceOrder = async () => {
     setIsProcessing(true)
+    setError("")
 
-    // Simulate API call to place order
-    setTimeout(() => {
-      setIsProcessing(false)
+    try {
+      // Prepare order data with the fixed values
+      const orderData = {
+        items: cartItems.map((item) => ({
+          id: item.id,
+          quantity: item.quantity,
+        })),
+        address: "123 Main Street, NY",
+        city: "New York",
+        country: "USA",
+        zipCode: "10001",
+        paymentMethod: "paypal"
+      }
+
+      // Send order to API
+      await api.post("/order/placeOrder", orderData)
+
+      // Order successful
       setOrderSuccess(true)
-      // Clear cart after successful order
-      // setCartItems([])
-    }, 2000)
+    } catch (error) {
+      console.error("Failed to place order:", error)
+      if (error.response && error.response.data.message) {
+        setError(error.response.data.message)
+      } else {
+        setError("Failed to place your order. Please try again.")
+      }
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   return (
@@ -82,7 +139,15 @@ export default function CartPage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
           <h1 className="text-4xl font-display text-white mb-12">Your Cart</h1>
 
-          {cartItems.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-16">
+              <p className="text-white">Loading your cart...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8 bg-red-900/20 rounded-lg border border-red-900">
+              <p className="text-red-400">{error}</p>
+            </div>
+          ) : cartItems.length === 0 ? (
             <div className="text-center py-16">
               <ShoppingBag className="w-16 h-16 text-white/30 mx-auto mb-6" />
               <h2 className="text-2xl text-white mb-4">Your cart is empty</h2>
@@ -187,149 +252,31 @@ export default function CartPage() {
                       <span>${total.toFixed(2)}</span>
                     </div>
 
-                    {!showOrderForm ? (
-                      <button
-                        onClick={handlePlaceOrder}
-                        className="w-full bg-accent-green text-dark-900 py-3 rounded-md font-medium hover:bg-accent-green/90 transition-colors mt-6"
-                      >
-                        Place Order
-                      </button>
-                    ) : (
-                      <form onSubmit={handleSubmitOrder} className="mt-6 space-y-4">
-                        <div>
-                          <label htmlFor="name" className="block text-white mb-1 text-sm">
-                            Full Name
-                          </label>
-                          <input
-                            type="text"
-                            id="name"
-                            name="name"
-                            value={orderInfo.name}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full bg-dark-700 border border-dark-600 text-white px-3 py-2 rounded-md focus:outline-none focus:border-accent-green"
-                          />
-                        </div>
+                    <div className="p-4 bg-dark-700 rounded-md">
+                      <p className="text-white/70 text-sm mb-2">Delivery Information:</p>
+                      <p className="text-white text-sm">Address: 123 Main Street, NY</p>
+                      <p className="text-white text-sm">Payment: PayPal</p>
+                    </div>
 
-                        <div>
-                          <label htmlFor="email" className="block text-white mb-1 text-sm">
-                            Email
-                          </label>
-                          <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            value={orderInfo.email}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full bg-dark-700 border border-dark-600 text-white px-3 py-2 rounded-md focus:outline-none focus:border-accent-green"
-                          />
-                        </div>
+                    <button
+                      onClick={handlePlaceOrder}
+                      disabled={isProcessing}
+                      className={`w-full bg-accent-green text-dark-900 py-3 rounded-md font-medium transition-colors ${
+                        isProcessing ? "opacity-70 cursor-not-allowed" : "hover:bg-accent-green/90"
+                      }`}
+                    >
+                      {isProcessing ? "Processing..." : "Place Order"}
+                    </button>
 
-                        <div>
-                          <label htmlFor="address" className="block text-white mb-1 text-sm">
-                            Address
-                          </label>
-                          <input
-                            type="text"
-                            id="address"
-                            name="address"
-                            value={orderInfo.address}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full bg-dark-700 border border-dark-600 text-white px-3 py-2 rounded-md focus:outline-none focus:border-accent-green"
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <label htmlFor="city" className="block text-white mb-1 text-sm">
-                              City
-                            </label>
-                            <input
-                              type="text"
-                              id="city"
-                              name="city"
-                              value={orderInfo.city}
-                              onChange={handleInputChange}
-                              required
-                              className="w-full bg-dark-700 border border-dark-600 text-white px-3 py-2 rounded-md focus:outline-none focus:border-accent-green"
-                            />
-                          </div>
-                          <div>
-                            <label htmlFor="zipCode" className="block text-white mb-1 text-sm">
-                              Zip Code
-                            </label>
-                            <input
-                              type="text"
-                              id="zipCode"
-                              name="zipCode"
-                              value={orderInfo.zipCode}
-                              onChange={handleInputChange}
-                              required
-                              className="w-full bg-dark-700 border border-dark-600 text-white px-3 py-2 rounded-md focus:outline-none focus:border-accent-green"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label htmlFor="country" className="block text-white mb-1 text-sm">
-                            Country
-                          </label>
-                          <input
-                            type="text"
-                            id="country"
-                            name="country"
-                            value={orderInfo.country}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full bg-dark-700 border border-dark-600 text-white px-3 py-2 rounded-md focus:outline-none focus:border-accent-green"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-white mb-1 text-sm">Payment Method</label>
-                          <div className="flex items-center space-x-4">
-                            <label className="flex items-center text-white/70">
-                              <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="credit_card"
-                                checked={orderInfo.paymentMethod === "credit_card"}
-                                onChange={handleInputChange}
-                                className="mr-2 accent-accent-green"
-                              />
-                              Credit Card
-                            </label>
-                            <label className="flex items-center text-white/70">
-                              <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="paypal"
-                                checked={orderInfo.paymentMethod === "paypal"}
-                                onChange={handleInputChange}
-                                className="mr-2 accent-accent-green"
-                              />
-                              PayPal
-                            </label>
-                          </div>
-                        </div>
-
-                        <button
-                          type="submit"
-                          disabled={isProcessing}
-                          className={`w-full bg-accent-green text-dark-900 py-3 rounded-md font-medium transition-colors ${
-                            isProcessing ? "opacity-70 cursor-not-allowed" : "hover:bg-accent-green/90"
-                          }`}
-                        >
-                          {isProcessing ? "Processing..." : "Confirm Order"}
-                        </button>
-                      </form>
+                    {error && (
+                      <div className="bg-red-900/20 p-3 rounded-md border border-red-900">
+                        <p className="text-red-400 text-sm">{error}</p>
+                      </div>
                     )}
 
                     <Link
                       href="/shop"
-                      className="block text-center text-white/70 hover:text-white transition-colors mt-4 items-center justify-center"
+                      className="block text-center text-white/70 hover:text-white transition-colors mt-4 flex items-center justify-center"
                     >
                       Continue Shopping
                       <ArrowRight className="ml-2 w-4 h-4" />
@@ -344,4 +291,3 @@ export default function CartPage() {
     </div>
   )
 }
-
