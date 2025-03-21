@@ -87,7 +87,7 @@ export default function ArtisansPage() {
       <section className="relative h-[50vh] flex items-center">
         <div className="absolute inset-0 z-0">
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-koolshooters-9736720.jpg-WAQ8EHL8wibRIMix59YGewjjmeh5vP.jpeg"
+            src="https://img.freepik.com/free-photo/sculptor-artist-working-with-clay-studio_23-2149986287.jpg?t=st=1742311579~exp=1742315179~hmac=386d159dc2ab509fd31820dc602428c0580ccf7c6a2b59e9c96bb4aea803b9a9&w=1380"
             alt="Ceramic artisan at work"
             fill
             className="object-cover"
