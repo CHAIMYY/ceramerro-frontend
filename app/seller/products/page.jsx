@@ -1,10 +1,18 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Plus, Search, Edit, Trash2, ArrowUpDown, Loader2, Package } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
+import { useState, useEffect } from "react";
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  ArrowUpDown,
+  Loader2,
+  Package,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -12,26 +20,37 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { toast } from "@/components/ui/use-toast"
-import axios from "axios"
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "@/components/ui/use-toast";
+import axios from "axios";
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [categoryFilter, setCategoryFilter] = useState("")
-  const [statusFilter, setStatusFilter] = useState("")
-  const [sortBy, setSortBy] = useState("newest")
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [currentProduct, setCurrentProduct] = useState(null)
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [currentProduct, setCurrentProduct] = useState(null);
   const [formData, setFormData] = useState({
     nom: "",
     description: "",
@@ -51,234 +70,255 @@ export default function ProductsPage() {
       value: "",
       unit: "lb",
     },
-  })
-  const [formErrors, setFormErrors] = useState({})
-  const [submitting, setSubmitting] = useState(false)
+  });
+  const [formErrors, setFormErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchProducts()
-  }, [])
+    fetchProducts();
+  }, []);
 
   const fetchProducts = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
 
       // Get token from localStorage
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
       if (!token) {
-        window.location.href = "/login"
-        return
+        window.location.href = "/login";
+        return;
       }
 
-      const response = await axios.get("http://localhost:3001/api/artisan/products", {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await axios.get(
+        "http://localhost:3001/api/artisan/products",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      })
+      );
 
-      setProducts(response.data.products)
-      setLoading(false)
+      setProducts(response.data.products);
+      setLoading(false);
     } catch (error) {
-      console.error("Error fetching products:", error)
+      console.error("Error fetching products:", error);
       toast({
         title: "Error",
         description: "Failed to load products. Please try again.",
         variant: "destructive",
-      })
-      setLoading(false)
+      });
+      setLoading(false);
 
       // Handle unauthorized error
       if (error.response && error.response.status === 401) {
-        localStorage.removeItem("token")
-        window.location.href = "/login"
+        localStorage.removeItem("token");
+        window.location.href = "/login";
       }
     }
-  }
+  };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     if (name.includes(".")) {
-      const [parent, child] = name.split(".")
+      const [parent, child] = name.split(".");
       setFormData({
         ...formData,
         [parent]: {
           ...formData[parent],
           [child]: value,
         },
-      })
+      });
     } else {
       setFormData({
         ...formData,
         [name]: value,
-      })
+      });
     }
-  }
+  };
 
   const handleCheckboxChange = (e) => {
-    const { name, checked } = e.target
+    const { name, checked } = e.target;
     setFormData({
       ...formData,
       [name]: checked,
-    })
-  }
+    });
+  };
 
   const handleSelectChange = (name, value) => {
     if (name.includes(".")) {
-      const [parent, child] = name.split(".")
+      const [parent, child] = name.split(".");
       setFormData({
         ...formData,
         [parent]: {
           ...formData[parent],
           [child]: value,
         },
-      })
+      });
     } else {
       setFormData({
         ...formData,
         [name]: value,
-      })
+      });
     }
-  }
+  };
 
   const validateForm = () => {
-    const errors = {}
-    if (!formData.nom) errors.nom = "Product name is required"
-    if (!formData.description) errors.description = "Description is required"
-    if (!formData.prix || isNaN(formData.prix)) errors.prix = "Valid price is required"
-    if (!formData.stock || isNaN(formData.stock)) errors.stock = "Valid stock quantity is required"
+    const errors = {};
+    if (!formData.nom) errors.nom = "Product name is required";
+    if (!formData.description) errors.description = "Description is required";
+    if (!formData.prix || isNaN(formData.prix))
+      errors.prix = "Valid price is required";
+    if (!formData.stock || isNaN(formData.stock))
+      errors.stock = "Valid stock quantity is required";
 
-    setFormErrors(errors)
-    return Object.keys(errors).length === 0
-  }
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleAddProduct = async () => {
-    if (!validateForm()) return
+    if (!validateForm()) return;
 
     try {
-      setSubmitting(true)
+      setSubmitting(true);
 
       // Get token from localStorage
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
       if (!token) {
-        window.location.href = "/login"
-        return
+        window.location.href = "/login";
+        return;
       }
 
-      const response = await axios.post("http://localhost:3001/api/product/create", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await axios.post(
+        "http://localhost:3001/api/product/create",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      })
+      );
 
-      setProducts([...products, response.data.product])
-      setIsAddDialogOpen(false)
-      resetForm()
+      setProducts([...products, response.data.product]);
+      setIsAddDialogOpen(false);
+      resetForm();
       toast({
         title: "Success",
         description: "Product added successfully",
-      })
+      });
     } catch (error) {
-      console.error("Error adding product:", error)
+      console.error("Error adding product:", error);
       toast({
         title: "Error",
         description: error.response?.data?.message || "Failed to add product",
         variant: "destructive",
-      })
+      });
 
       // Handle unauthorized error
       if (error.response && error.response.status === 401) {
-        localStorage.removeItem("token")
-        window.location.href = "/login"
+        localStorage.removeItem("token");
+        window.location.href = "/login";
       }
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   const handleEditProduct = async () => {
-    if (!validateForm()) return
+    if (!validateForm()) return;
 
     try {
-      setSubmitting(true)
+      setSubmitting(true);
 
       // Get token from localStorage
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
       if (!token) {
-        window.location.href = "/login"
-        return
+        window.location.href = "/login";
+        return;
       }
 
-      const response = await axios.put(`http://localhost:3001/api/product/update/${currentProduct._id}`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await axios.put(
+        `http://localhost:3001/api/product/update/${currentProduct._id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      })
+      );
 
-      setProducts(products.map((p) => (p._id === currentProduct._id ? response.data.product : p)))
-      setIsEditDialogOpen(false)
-      resetForm()
+      setProducts(
+        products.map((p) =>
+          p._id === currentProduct._id ? response.data.product : p,
+        ),
+      );
+      setIsEditDialogOpen(false);
+      resetForm();
       toast({
         title: "Success",
         description: "Product updated successfully",
-      })
+      });
     } catch (error) {
-      console.error("Error updating product:", error)
+      console.error("Error updating product:", error);
       toast({
         title: "Error",
-        description: error.response?.data?.message || "Failed to update product",
+        description:
+          error.response?.data?.message || "Failed to update product",
         variant: "destructive",
-      })
+      });
 
       // Handle unauthorized error
       if (error.response && error.response.status === 401) {
-        localStorage.removeItem("token")
-        window.location.href = "/login"
+        localStorage.removeItem("token");
+        window.location.href = "/login";
       }
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   const handleDeleteProduct = async () => {
     try {
-      setSubmitting(true)
+      setSubmitting(true);
 
       // Get token from localStorage
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
       if (!token) {
-        window.location.href = "/login"
-        return
+        window.location.href = "/login";
+        return;
       }
 
-      await axios.delete(`http://localhost:3001/api/product/delete/${currentProduct._id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      await axios.delete(
+        `http://localhost:3001/api/product/delete/${currentProduct._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      })
+      );
 
-      setProducts(products.filter((p) => p._id !== currentProduct._id))
-      setIsDeleteDialogOpen(false)
+      setProducts(products.filter((p) => p._id !== currentProduct._id));
+      setIsDeleteDialogOpen(false);
       toast({
         title: "Success",
         description: "Product deleted successfully",
-      })
+      });
     } catch (error) {
-      console.error("Error deleting product:", error)
+      console.error("Error deleting product:", error);
       toast({
         title: "Error",
-        description: error.response?.data?.message || "Failed to delete product",
+        description:
+          error.response?.data?.message || "Failed to delete product",
         variant: "destructive",
-      })
+      });
 
-   
       if (error.response && error.response.status === 401) {
-        localStorage.removeItem("token")
-        window.location.href = "/login"
+        localStorage.removeItem("token");
+        window.location.href = "/login";
       }
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   const resetForm = () => {
     setFormData({
@@ -300,12 +340,12 @@ export default function ProductsPage() {
         value: "",
         unit: "lb",
       },
-    })
-    setFormErrors({})
-  }
+    });
+    setFormErrors({});
+  };
 
   const openEditDialog = (product) => {
-    setCurrentProduct(product)
+    setCurrentProduct(product);
     setFormData({
       nom: product.nom,
       description: product.description,
@@ -325,38 +365,41 @@ export default function ProductsPage() {
         value: product.weight?.value || "",
         unit: product.weight?.unit || "lb",
       },
-    })
-    setIsEditDialogOpen(true)
-  }
+    });
+    setIsEditDialogOpen(true);
+  };
 
   const openDeleteDialog = (product) => {
-    setCurrentProduct(product)
-    setIsDeleteDialogOpen(true)
-  }
-
+    setCurrentProduct(product);
+    setIsDeleteDialogOpen(true);
+  };
 
   const filteredProducts = products
     .filter((product) => {
       const matchesSearch =
         product.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description?.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesCategory = categoryFilter ? product.category === categoryFilter : true
-      const matchesStatus = statusFilter ? product.status === statusFilter : true
+        product.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = categoryFilter
+        ? product.category === categoryFilter
+        : true;
+      const matchesStatus = statusFilter
+        ? product.status === statusFilter
+        : true;
 
-      return matchesSearch && matchesCategory && matchesStatus
+      return matchesSearch && matchesCategory && matchesStatus;
     })
     .sort((a, b) => {
       if (sortBy === "newest") {
-        return new Date(b.createdAt) - new Date(a.createdAt)
+        return new Date(b.createdAt) - new Date(a.createdAt);
       } else if (sortBy === "oldest") {
-        return new Date(a.createdAt) - new Date(b.createdAt)
+        return new Date(a.createdAt) - new Date(b.createdAt);
       } else if (sortBy === "priceHigh") {
-        return b.prix - a.prix
+        return b.prix - a.prix;
       } else if (sortBy === "priceLow") {
-        return a.prix - b.prix
+        return a.prix - b.prix;
       }
-      return 0
-    })
+      return 0;
+    });
 
   return (
     <div className="space-y-6">
@@ -364,8 +407,8 @@ export default function ProductsPage() {
         <h1 className="text-3xl font-bold">Products</h1>
         <Button
           onClick={() => {
-            resetForm()
-            setIsAddDialogOpen(true)
+            resetForm();
+            setIsAddDialogOpen(true);
           }}
         >
           <Plus className="mr-2 h-4 w-4" /> Add Product
@@ -387,7 +430,10 @@ export default function ProductsPage() {
           </div>
         </div>
         <div className="flex space-x-2">
-          <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value)}>
+          <Select
+            value={categoryFilter}
+            onValueChange={(value) => setCategoryFilter(value)}
+          >
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
@@ -400,7 +446,10 @@ export default function ProductsPage() {
             </SelectContent>
           </Select>
 
-          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value)}>
+          <Select
+            value={statusFilter}
+            onValueChange={(value) => setStatusFilter(value)}
+          >
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
@@ -420,10 +469,18 @@ export default function ProductsPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setSortBy("newest")}>Newest First</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("oldest")}>Oldest First</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("priceHigh")}>Price: High to Low</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("priceLow")}>Price: Low to High</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("newest")}>
+                Newest First
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("oldest")}>
+                Oldest First
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("priceHigh")}>
+                Price: High to Low
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("priceLow")}>
+                Price: Low to High
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -446,7 +503,9 @@ export default function ProductsPage() {
                     className="object-cover w-full h-full"
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-full text-muted-foreground">No Image</div>
+                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                    No Image
+                  </div>
                 )}
                 <div className="absolute top-2 right-2 flex space-x-1">
                   <Button
@@ -474,7 +533,9 @@ export default function ProductsPage() {
               </div>
               <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-semibold text-lg line-clamp-1">{product.nom}</h3>
+                  <h3 className="font-semibold text-lg line-clamp-1">
+                    {product.nom}
+                  </h3>
                   <span className="font-bold">${product.prix}</span>
                 </div>
                 <div className="flex items-center text-sm text-muted-foreground mb-2">
@@ -491,9 +552,13 @@ export default function ProductsPage() {
                   <span className="mx-2">•</span>
                   <span>Stock: {product.stock}</span>
                 </div>
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{product.description}</p>
+                <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                  {product.description}
+                </p>
                 <div className="text-xs text-muted-foreground">
-                  <span className="capitalize">{product.category || "Uncategorized"}</span>
+                  <span className="capitalize">
+                    {product.category || "Uncategorized"}
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -513,8 +578,8 @@ export default function ProductsPage() {
           {!searchTerm && !categoryFilter && !statusFilter && (
             <Button
               onClick={() => {
-                resetForm()
-                setIsAddDialogOpen(true)
+                resetForm();
+                setIsAddDialogOpen(true);
               }}
             >
               <Plus className="mr-2 h-4 w-4" /> Add Your First Product
@@ -528,7 +593,9 @@ export default function ProductsPage() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New Product</DialogTitle>
-            <DialogDescription>Fill in the details to add a new product to your inventory.</DialogDescription>
+            <DialogDescription>
+              Fill in the details to add a new product to your inventory.
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -541,7 +608,9 @@ export default function ProductsPage() {
                   onChange={handleInputChange}
                   className={formErrors.nom ? "border-red-500" : ""}
                 />
-                {formErrors.nom && <p className="text-xs text-red-500">{formErrors.nom}</p>}
+                {formErrors.nom && (
+                  <p className="text-xs text-red-500">{formErrors.nom}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="prix">Price ($)</Label>
@@ -553,7 +622,9 @@ export default function ProductsPage() {
                   onChange={handleInputChange}
                   className={formErrors.prix ? "border-red-500" : ""}
                 />
-                {formErrors.prix && <p className="text-xs text-red-500">{formErrors.prix}</p>}
+                {formErrors.prix && (
+                  <p className="text-xs text-red-500">{formErrors.prix}</p>
+                )}
               </div>
             </div>
 
@@ -566,13 +637,20 @@ export default function ProductsPage() {
                 onChange={handleInputChange}
                 className={formErrors.description ? "border-red-500" : ""}
               />
-              {formErrors.description && <p className="text-xs text-red-500">{formErrors.description}</p>}
+              {formErrors.description && (
+                <p className="text-xs text-red-500">{formErrors.description}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
-                <Select value={formData.category} onValueChange={(value) => handleSelectChange("category", value)}>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) =>
+                    handleSelectChange("category", value)
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
@@ -594,14 +672,19 @@ export default function ProductsPage() {
                   onChange={handleInputChange}
                   className={formErrors.stock ? "border-red-500" : ""}
                 />
-                {formErrors.stock && <p className="text-xs text-red-500">{formErrors.stock}</p>}
+                {formErrors.stock && (
+                  <p className="text-xs text-red-500">{formErrors.stock}</p>
+                )}
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
-                <Select value={formData.status} onValueChange={(value) => handleSelectChange("status", value)}>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) => handleSelectChange("status", value)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
@@ -617,7 +700,9 @@ export default function ProductsPage() {
                   id="featured"
                   name="featured"
                   checked={formData.featured}
-                  onCheckedChange={(checked) => setFormData({ ...formData, featured: checked })}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, featured: checked })
+                  }
                 />
                 <Label htmlFor="featured">Featured Product</Label>
               </div>
@@ -649,7 +734,9 @@ export default function ProductsPage() {
                 />
                 <Select
                   value={formData.dimensions.unit}
-                  onValueChange={(value) => handleSelectChange("dimensions.unit", value)}
+                  onValueChange={(value) =>
+                    handleSelectChange("dimensions.unit", value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Unit" />
@@ -674,7 +761,9 @@ export default function ProductsPage() {
                 />
                 <Select
                   value={formData.weight.unit}
-                  onValueChange={(value) => handleSelectChange("weight.unit", value)}
+                  onValueChange={(value) =>
+                    handleSelectChange("weight.unit", value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Unit" />
@@ -696,7 +785,9 @@ export default function ProductsPage() {
                   <Button variant="outline" className="w-full">
                     Upload Images
                   </Button>
-                  <p className="text-xs text-muted-foreground mt-2">Upload up to 5 images. Max 5MB each.</p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Upload up to 5 images. Max 5MB each.
+                  </p>
                 </div>
               </div>
             </div>
@@ -718,7 +809,9 @@ export default function ProductsPage() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Product</DialogTitle>
-            <DialogDescription>Update the details of your product.</DialogDescription>
+            <DialogDescription>
+              Update the details of your product.
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             {/* Same form fields as Add Product Dialog */}
@@ -732,7 +825,9 @@ export default function ProductsPage() {
                   onChange={handleInputChange}
                   className={formErrors.nom ? "border-red-500" : ""}
                 />
-                {formErrors.nom && <p className="text-xs text-red-500">{formErrors.nom}</p>}
+                {formErrors.nom && (
+                  <p className="text-xs text-red-500">{formErrors.nom}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-prix">Price ($)</Label>
@@ -744,7 +839,9 @@ export default function ProductsPage() {
                   onChange={handleInputChange}
                   className={formErrors.prix ? "border-red-500" : ""}
                 />
-                {formErrors.prix && <p className="text-xs text-red-500">{formErrors.prix}</p>}
+                {formErrors.prix && (
+                  <p className="text-xs text-red-500">{formErrors.prix}</p>
+                )}
               </div>
             </div>
 
@@ -758,13 +855,20 @@ export default function ProductsPage() {
                 onChange={handleInputChange}
                 className={formErrors.description ? "border-red-500" : ""}
               />
-              {formErrors.description && <p className="text-xs text-red-500">{formErrors.description}</p>}
+              {formErrors.description && (
+                <p className="text-xs text-red-500">{formErrors.description}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="edit-category">Category</Label>
-                <Select value={formData.category} onValueChange={(value) => handleSelectChange("category", value)}>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) =>
+                    handleSelectChange("category", value)
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
@@ -786,14 +890,19 @@ export default function ProductsPage() {
                   onChange={handleInputChange}
                   className={formErrors.stock ? "border-red-500" : ""}
                 />
-                {formErrors.stock && <p className="text-xs text-red-500">{formErrors.stock}</p>}
+                {formErrors.stock && (
+                  <p className="text-xs text-red-500">{formErrors.stock}</p>
+                )}
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="edit-status">Status</Label>
-                <Select value={formData.status} onValueChange={(value) => handleSelectChange("status", value)}>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) => handleSelectChange("status", value)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
@@ -809,14 +918,19 @@ export default function ProductsPage() {
                   id="edit-featured"
                   name="featured"
                   checked={formData.featured}
-                  onCheckedChange={(checked) => setFormData({ ...formData, featured: checked })}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, featured: checked })
+                  }
                 />
                 <Label htmlFor="edit-featured">Featured Product</Label>
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button onClick={handleEditProduct} disabled={submitting}>
@@ -833,14 +947,22 @@ export default function ProductsPage() {
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this product? This action cannot be undone.
+              Are you sure you want to delete this product? This action cannot
+              be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDeleteProduct} disabled={submitting}>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteProduct}
+              disabled={submitting}
+            >
               {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Delete
             </Button>
@@ -848,6 +970,5 @@ export default function ProductsPage() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
-

@@ -16,10 +16,10 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <LanguageProvider>
         <CurrencyProvider>
-          <body className={`${inter.className} bg-cream min-h-screen flex flex-col`}>
-            <ClientLayout>
-              {children}
-            </ClientLayout>
+          <body
+            className={`${inter.className} bg-cream min-h-screen flex flex-col`}
+          >
+            <ClientLayout>{children}</ClientLayout>
           </body>
         </CurrencyProvider>
       </LanguageProvider>

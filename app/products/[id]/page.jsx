@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { useCurrency } from "../../contexts/CurrencyContext"
+import Image from "next/image";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useCurrency } from "../../contexts/CurrencyContext";
 
 export default function ProductDetails({ params }) {
-  const [quantity, setQuantity] = useState(1)
-  const { currency } = useCurrency()
+  const [quantity, setQuantity] = useState(1);
+  const { currency } = useCurrency();
 
   // Mock product data - in a real app, you'd fetch this based on the ID
   const product = {
-    id:1,
+    id: 1,
     name: "Handcrafted Ceramic Vase",
     price: { USD: 129.99, EUR: 109.99, GBP: 99.99 },
     description:
@@ -20,7 +20,7 @@ export default function ProductDetails({ params }) {
     artisan: "Jane Doe",
     dimensions: '8" x 6" x 10"',
     weight: "2 lbs",
-  }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -56,5 +56,5 @@ export default function ProductDetails({ params }) {
         </div>
       </div>
     </div>
-  )
+  );
 }

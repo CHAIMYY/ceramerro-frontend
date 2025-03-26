@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Package, ShoppingCart, FileText, TrendingUp } from "lucide-react"
-import { Skeleton } from "@/components/ui/skeleton"
-import axios from "axios"
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Package, ShoppingCart, FileText, TrendingUp } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import axios from "axios";
 import {
   LineChart,
   Line,
@@ -16,13 +16,13 @@ import {
   BarChart,
   Bar,
   Legend,
-} from "recharts"
+} from "recharts";
 
 export default function Dashboard() {
-  const [stats, setStats] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [recentOrders, setRecentOrders] = useState([])
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [recentOrders, setRecentOrders] = useState([]);
 
   // Mock data for charts
   const salesData = [
@@ -32,59 +32,65 @@ export default function Dashboard() {
     { name: "Apr", sales: 2400 },
     { name: "May", sales: 2700 },
     { name: "Jun", sales: 3000 },
-  ]
+  ];
 
   const categoryData = [
     { name: "Pottery", value: 35 },
     { name: "Sculpture", value: 25 },
     { name: "Tableware", value: 30 },
     { name: "Other", value: 10 },
-  ]
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true)
+        setLoading(true);
 
         // Get token from localStorage
-        const token = localStorage.getItem("token")
+        const token = localStorage.getItem("token");
         if (!token) {
-          window.location.href = "/login"
-          return
+          window.location.href = "/login";
+          return;
         }
 
         // Fetch statistics
-        const statsResponse = await axios.get("http://localhost:3001/api/artisan/stats", {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const statsResponse = await axios.get(
+          "http://localhost:3001/api/artisan/stats",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        })
-        setStats(statsResponse.data.sellerStatistics)
+        );
+        setStats(statsResponse.data.sellerStatistics);
 
         // Fetch recent orders
-        const ordersResponse = await axios.get("http://localhost:3001/api/artisan/orders", {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const ordersResponse = await axios.get(
+          "http://localhost:3001/api/artisan/orders",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        })
-        setRecentOrders(ordersResponse.data.orders.slice(0, 5)) // Get only 5 most recent
+        );
+        setRecentOrders(ordersResponse.data.orders.slice(0, 5)); // Get only 5 most recent
 
-        setLoading(false)
+        setLoading(false);
       } catch (err) {
-        console.error("Error fetching dashboard data:", err)
-        setError("Failed to load dashboard data. Please try again later.")
-        setLoading(false)
+        console.error("Error fetching dashboard data:", err);
+        setError("Failed to load dashboard data. Please try again later.");
+        setLoading(false);
 
         // Handle unauthorized error
         if (err.response && err.response.status === 401) {
-          localStorage.removeItem("token")
-          window.location.href = "/login"
+          localStorage.removeItem("token");
+          window.location.href = "/login";
         }
       }
-    }
+    };
 
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   if (error) {
     return (
@@ -94,7 +100,7 @@ export default function Dashboard() {
           <p className="mt-2">{error}</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -123,7 +129,9 @@ export default function Dashboard() {
         />
         <StatCard
           title="Revenue"
-          value={loading ? null : `$${stats?.totalRevenue?.toFixed(2) || "0.00"}`}
+          value={
+            loading ? null : `$${stats?.totalRevenue?.toFixed(2) || "0.00"}`
+          }
           icon={<TrendingUp className="h-5 w-5" />}
           loading={loading}
         />
@@ -143,7 +151,12 @@ export default function Dashboard() {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
-                  <Line type="monotone" dataKey="sales" stroke="#8884d8" activeDot={{ r: 8 }} />
+                  <Line
+                    type="monotone"
+                    dataKey="sales"
+                    stroke="#8884d8"
+                    activeDot={{ r: 8 }}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -198,7 +211,9 @@ export default function Dashboard() {
                   {recentOrders.map((order) => (
                     <tr key={order._id} className="border-b">
                       <td className="py-3 px-2">{order._id.substring(0, 8)}</td>
-                      <td className="py-3 px-2">{order.user?.email || "Unknown"}</td>
+                      <td className="py-3 px-2">
+                        {order.user?.email || "Unknown"}
+                      </td>
                       <td className="py-3 px-2">
                         <span
                           className={`px-2 py-1 rounded-full text-xs ${
@@ -213,22 +228,27 @@ export default function Dashboard() {
                                     : "bg-gray-100 text-gray-800"
                           }`}
                         >
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                          {order.status.charAt(0).toUpperCase() +
+                            order.status.slice(1)}
                         </span>
                       </td>
-                      <td className="py-3 px-2 text-right">${order.total?.toFixed(2) || "0.00"}</td>
+                      <td className="py-3 px-2 text-right">
+                        ${order.total?.toFixed(2) || "0.00"}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           ) : (
-            <p className="text-center py-4 text-muted-foreground">No recent orders found.</p>
+            <p className="text-center py-4 text-muted-foreground">
+              No recent orders found.
+            </p>
           )}
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
 function StatCard({ title, value, icon, loading }) {
@@ -239,9 +259,12 @@ function StatCard({ title, value, icon, loading }) {
         <div className="text-muted-foreground">{icon}</div>
       </CardHeader>
       <CardContent>
-        {loading ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-bold">{value}</div>}
+        {loading ? (
+          <Skeleton className="h-8 w-24" />
+        ) : (
+          <div className="text-2xl font-bold">{value}</div>
+        )}
       </CardContent>
     </Card>
-  )
+  );
 }
-

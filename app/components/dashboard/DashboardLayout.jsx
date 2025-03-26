@@ -1,8 +1,18 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { BarChart3, Box, Home, LayoutDashboard, LogOut, Package, Settings, ShoppingCart, Users } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import {
+  BarChart3,
+  Box,
+  Home,
+  LayoutDashboard,
+  LogOut,
+  Package,
+  Settings,
+  ShoppingCart,
+  Users,
+} from "lucide-react";
 
 export default function DashboardLayout({ children, role }) {
   const adminNavItems = [
@@ -13,7 +23,7 @@ export default function DashboardLayout({ children, role }) {
     { icon: Box, label: "Categories", href: "/admin/categories" },
     { icon: BarChart3, label: "Analytics", href: "/admin/analytics" },
     { icon: Settings, label: "Settings", href: "/admin/settings" },
-  ]
+  ];
 
   const sellerNavItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/seller" },
@@ -21,9 +31,9 @@ export default function DashboardLayout({ children, role }) {
     { icon: ShoppingCart, label: "Orders", href: "/seller/orders" },
     { icon: BarChart3, label: "Analytics", href: "/seller/analytics" },
     { icon: Settings, label: "Settings", href: "/seller/settings" },
-  ]
+  ];
 
-  const navItems = role === "admin" ? adminNavItems : sellerNavItems
+  const navItems = role === "admin" ? adminNavItems : sellerNavItems;
 
   return (
     <div className="min-h-screen bg-pearl">
@@ -33,7 +43,9 @@ export default function DashboardLayout({ children, role }) {
           <div className="p-6">
             <Link href="/" className="flex items-center space-x-2">
               <Home className="w-6 h-6" />
-              <span className="font-bold text-xl">{role === "admin" ? "admin" : "seller"} Panel</span>
+              <span className="font-bold text-xl">
+                {role === "admin" ? "admin" : "seller"} Panel
+              </span>
             </Link>
           </div>
           <nav className="flex-1 p-4">
@@ -52,7 +64,10 @@ export default function DashboardLayout({ children, role }) {
             </ul>
           </nav>
           <div className="p-4 border-t border-orchid/20">
-            <Button variant="ghost" className="w-full flex items-center space-x-2 text-pearl hover:text-orchid">
+            <Button
+              variant="ghost"
+              className="w-full flex items-center space-x-2 text-pearl hover:text-orchid"
+            >
               <LogOut className="w-5 h-5" />
               <span>Logout</span>
             </Button>
@@ -65,5 +80,5 @@ export default function DashboardLayout({ children, role }) {
         </main>
       </div>
     </div>
-  )
+  );
 }

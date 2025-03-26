@@ -1,113 +1,124 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import Image from "next/image"
-import Link from "next/link"
-import { Search, Calendar, User, Clock, ArrowRight } from "lucide-react"
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+import { Search, Calendar, User, Clock, ArrowRight } from "lucide-react";
 
 export default function BlogPage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [activeCategory, setActiveCategory] = useState("all")
-  const [blogPosts, setBlogPosts] = useState([])
-  const [featuredPost, setFeaturedPost] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [blogPosts, setBlogPosts] = useState([]);
+  const [featuredPost, setFeaturedPost] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const categories = [
     { id: "all", name: "All Posts" },
-    { id: "techniques", name: "Techniques" },
+    // { id: "techniques", name: "Techniques" },
     { id: "inspiration", name: "Inspiration" },
     { id: "interviews", name: "Artisan Interviews" },
     { id: "care", name: "Product Care" },
-  ]
+  ];
 
- 
   const formatDate = (dateString) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    })
-  }
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
   // Calculate read time based on content length (rough estimate)
   const calculateReadTime = (content) => {
-    const wordsPerMinute = 200
-    const wordCount = content.split(/\s+/).length
-    const readTime = Math.ceil(wordCount / wordsPerMinute)
-    return `${readTime} min read`
-  }
+    const wordsPerMinute = 200;
+    const wordCount = content.split(/\s+/).length;
+    const readTime = Math.ceil(wordCount / wordsPerMinute);
+    return `${readTime} min read`;
+  };
 
   // Fetch blog posts from API
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        setLoading(true)
-        const response = await fetch('http://localhost:3001/api/blog/posts')
-        
+        setLoading(true);
+        const response = await fetch("http://localhost:3001/api/blog/posts");
+
         if (!response.ok) {
-          throw new Error('Failed to fetch posts')
+          throw new Error("Failed to fetch posts");
         }
-        
-        const data = await response.json()
-        
+
+        const data = await response.json();
+
         // Process the data
-        const processedPosts = data.map(post => ({
+        const processedPosts = data.map((post) => ({
           id: post._id,
           title: post.titre,
-          excerpt: post.contenu.substring(0, 120) + (post.contenu.length > 120 ? '...' : ''),
+          excerpt:
+            post.contenu.substring(0, 120) +
+            (post.contenu.length > 120 ? "..." : ""),
           date: formatDate(post.datePublication),
           readTime: calculateReadTime(post.contenu),
           author: "Author", // API doesn't provide author name directly
-          category: post.slug.includes('first') ? 'techniques' : 
-                   post.slug.includes('second') ? 'inspiration' : 'care', // Assign categories based on slug
-          image: post.postPicture || "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-koolshooters-9736720.jpg-WAQ8EHL8wibRIMix59YGewjjmeh5vP.jpeg",
+          category: post.slug.includes("first")
+            ? "techniques"
+            : post.slug.includes("second")
+              ? "inspiration"
+              : "care", // Assign categories based on slug
+          image:
+            post.postPicture ||
+            "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-koolshooters-9736720.jpg-WAQ8EHL8wibRIMix59YGewjjmeh5vP.jpeg",
           likes: post.likes,
           comments: post.comments || [],
-          slug: post.slug
-        }))
-        
-        setBlogPosts(processedPosts)
-        
+          slug: post.slug,
+        }));
+
+        setBlogPosts(processedPosts);
+
         // Set the post with most likes as featured
         if (processedPosts.length > 0) {
-          const mostLiked = [...processedPosts].sort((a, b) => b.likes - a.likes)[0]
-          setFeaturedPost(mostLiked)
+          const mostLiked = [...processedPosts].sort(
+            (a, b) => b.likes - a.likes,
+          )[0];
+          setFeaturedPost(mostLiked);
         }
-        
-        setLoading(false)
+
+        setLoading(false);
       } catch (err) {
-        console.error("Error fetching blog posts:", err)
-        setError(err.message)
-        setLoading(false)
+        console.error("Error fetching blog posts:", err);
+        setError(err.message);
+        setLoading(false);
       }
-    }
-    
-    fetchPosts()
-  }, [])
+    };
+
+    fetchPosts();
+  }, []);
 
   // Filter posts based on active category and search query
   const filteredPosts = blogPosts
-    .filter(post => activeCategory === "all" || post.category === activeCategory)
-    .filter(post => 
-      searchQuery === "" || 
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
+    .filter(
+      (post) => activeCategory === "all" || post.category === activeCategory,
     )
-    .filter(post => post.id !== (featuredPost?.id || '')) // Exclude featured post
+    .filter(
+      (post) =>
+        searchQuery === "" ||
+        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()),
+    )
+    .filter((post) => post.id !== (featuredPost?.id || "")); // Exclude featured post
 
   return (
     <div className="pt-24 bg-dark-900 min-h-screen">
       {/* Hero Section */}
       <section className="relative h-[50vh] flex items-center">
         <div className="absolute inset-0 z-0">
-          <Image 
-            src={featuredPost?.image || "/placeholder.svg"} 
-            alt="Blog hero" 
-            fill 
-            className="object-cover" 
+          <Image
+            src={featuredPost?.image || "/placeholder.svg"}
+            alt="Blog hero"
+            fill
+            className="object-cover"
           />
           <div className="absolute inset-0 bg-dark-900/70" />
         </div>
@@ -119,10 +130,15 @@ export default function BlogPage() {
             transition={{ duration: 0.8 }}
             className="max-w-2xl"
           >
-            <span className="text-accent-green text-sm tracking-wider">CERAMIC ARTS BLOG</span>
-            <h1 className="text-5xl font-display text-white mt-2 mb-6">Insights & Inspiration</h1>
+            <span className="text-accent-green text-sm tracking-wider">
+              CERAMIC ARTS BLOG
+            </span>
+            <h1 className="text-5xl font-display text-white mt-2 mb-6">
+              Insights & Inspiration
+            </h1>
             <p className="text-white/70 text-lg mb-8">
-              Explore articles on ceramic techniques, artist interviews, and the latest trends in ceramic arts.
+              Explore articles on ceramic techniques, artist interviews, and the
+              latest trends in ceramic arts.
             </p>
             <div className="relative max-w-md">
               <input
@@ -156,7 +172,9 @@ export default function BlogPage() {
       {!loading && !error && featuredPost && (
         <section className="py-16 bg-dark-800">
           <div className="container mx-auto px-8">
-            <h2 className="text-3xl font-display text-white mb-8">Featured Article</h2>
+            <h2 className="text-3xl font-display text-white mb-8">
+              Featured Article
+            </h2>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -177,7 +195,8 @@ export default function BlogPage() {
               <div>
                 <div className="flex items-center space-x-4 mb-4">
                   <span className="bg-accent-green/20 text-accent-green px-3 py-1 rounded-full text-sm">
-                    {categories.find((cat) => cat.id === featuredPost.category)?.name || featuredPost.category}
+                    {categories.find((cat) => cat.id === featuredPost.category)
+                      ?.name || featuredPost.category}
                   </span>
                   <div className="flex items-center text-white/50 text-sm">
                     <Calendar className="w-4 h-4 mr-1" />
@@ -189,7 +208,9 @@ export default function BlogPage() {
                   </div>
                 </div>
 
-                <h3 className="text-2xl font-display text-white mb-4">{featuredPost.title}</h3>
+                <h3 className="text-2xl font-display text-white mb-4">
+                  {featuredPost.title}
+                </h3>
                 <p className="text-white/70 mb-6">{featuredPost.excerpt}</p>
 
                 <div className="flex items-center justify-between">
@@ -218,7 +239,9 @@ export default function BlogPage() {
         <section className="py-16 bg-dark-900">
           <div className="container mx-auto px-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
-              <h2 className="text-3xl font-display text-white mb-4 md:mb-0">Latest Articles</h2>
+              <h2 className="text-3xl font-display text-white mb-4 md:mb-0">
+                Latest Articles
+              </h2>
 
               <div className="flex flex-wrap gap-2">
                 {categories.map((category) => (
@@ -259,7 +282,8 @@ export default function BlogPage() {
                     <div className="p-6">
                       <div className="flex items-center space-x-4 mb-4">
                         <span className="bg-accent-green/20 text-accent-green px-2 py-1 rounded-full text-xs">
-                          {categories.find((cat) => cat.id === post.category)?.name || post.category}
+                          {categories.find((cat) => cat.id === post.category)
+                            ?.name || post.category}
                         </span>
                         <div className="flex items-center text-white/50 text-xs">
                           <Clock className="w-3 h-3 mr-1" />
@@ -270,19 +294,25 @@ export default function BlogPage() {
                       <h3 className="text-xl font-medium text-white mb-3 group-hover:text-accent-green transition-colors">
                         {post.title}
                       </h3>
-                      <p className="text-white/70 text-sm mb-4 line-clamp-2">{post.excerpt}</p>
+                      <p className="text-white/70 text-sm mb-4 line-clamp-2">
+                        {post.excerpt}
+                      </p>
 
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
                           <div className="w-6 h-6 rounded-full bg-dark-700 flex items-center justify-center mr-2">
                             <User className="w-3 h-3 text-white/70" />
                           </div>
-                          <span className="text-white/70 text-sm">{post.author}</span>
+                          <span className="text-white/70 text-sm">
+                            {post.author}
+                          </span>
                         </div>
 
-                        <span className="text-white/50 text-xs">{post.date}</span>
+                        <span className="text-white/50 text-xs">
+                          {post.date}
+                        </span>
                       </div>
-                      
+
                       {/* Display likes and comments count */}
                       <div className="flex items-center space-x-4 mt-3 text-white/50 text-xs">
                         <div>❤️ {post.likes} likes</div>
@@ -296,7 +326,9 @@ export default function BlogPage() {
 
             {filteredPosts.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-white/70">No articles found in this category.</p>
+                <p className="text-white/70">
+                  No articles found in this category.
+                </p>
               </div>
             )}
           </div>
@@ -307,9 +339,12 @@ export default function BlogPage() {
       <section className="py-16 bg-dark-800">
         <div className="container mx-auto px-8">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-3xl font-display text-white mb-4">Subscribe to Our Newsletter</h2>
+            <h2 className="text-3xl font-display text-white mb-4">
+              Subscribe to Our Newsletter
+            </h2>
             <p className="text-white/70 mb-8">
-              Get the latest articles, tutorials, and news about ceramic arts delivered straight to your inbox.
+              Get the latest articles, tutorials, and news about ceramic arts
+              delivered straight to your inbox.
             </p>
             <div className="flex">
               <input
@@ -325,5 +360,5 @@ export default function BlogPage() {
         </div>
       </section>
     </div>
-  )
+  );
 }

@@ -1,6 +1,6 @@
 let userConfig;
 try {
-  userConfig = (await import('./v0-user-next.config')).default;
+  userConfig = (await import("./v0-user-next.config")).default;
 } catch (e) {
   userConfig = undefined; // Ignore error
 }
@@ -32,7 +32,7 @@ function mergeConfig(baseConfig, customConfig) {
 
   for (const key in customConfig) {
     if (
-      typeof baseConfig[key] === 'object' &&
+      typeof baseConfig[key] === "object" &&
       !Array.isArray(baseConfig[key]) &&
       baseConfig[key] !== null
     ) {

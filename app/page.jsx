@@ -1,21 +1,22 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import { motion, AnimatePresence } from "framer-motion"
-import { Plus, ArrowRight, ChevronRight, ChevronLeft } from "lucide-react"
-import Link from "next/link"
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
+import { Plus, ArrowRight, ChevronRight, ChevronLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
-  const [activeMarker, setActiveMarker] = useState(null)
-  const [currentSlide, setCurrentSlide] = useState(0)
-  const [isVisible, setIsVisible] = useState(false)
+  const [activeMarker, setActiveMarker] = useState(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
 
   const featuredProducts = [
     {
       id: 1,
       name: "Minimalist Vase Collection",
-      description: "Handcrafted ceramic vases with clean lines and natural textures",
+      description:
+        "Handcrafted ceramic vases with clean lines and natural textures",
       image:
         "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-rethaferguson-3817497.jpg-g08fRDNGUnO4iHESPpPuTyvl3LtbdJ.jpeg",
       price: "$129.99",
@@ -36,7 +37,7 @@ export default function Home() {
         "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-pixabay-357428.jpg-E6GCvheFALz0JgBoVkQMy4WZj5QF3y.jpeg",
       price: "$149.99",
     },
-  ]
+  ];
 
   const markers = [
     {
@@ -55,46 +56,51 @@ export default function Home() {
       description: "Perfect for modern dining settings",
       price: "$89.99",
     },
-  ]
+  ];
 
   const testimonials = [
     {
       id: 1,
-      quote: "These ceramic pieces have transformed my living space. The craftsmanship is exceptional.",
+      quote:
+        "These ceramic pieces have transformed my living space. The craftsmanship is exceptional.",
       author: "Emma Johnson",
       role: "Interior Designer",
     },
     {
       id: 2,
-      quote: "I've never seen such attention to detail. Each piece tells a story and brings character to my home.",
+      quote:
+        "I've never seen such attention to detail. Each piece tells a story and brings character to my home.",
       author: "Michael Chen",
       role: "Art Collector",
     },
     {
       id: 3,
-      quote: "The quality and uniqueness of these ceramics are unmatched. Truly artisanal work.",
+      quote:
+        "The quality and uniqueness of these ceramics are unmatched. Truly artisanal work.",
       author: "Sophia Rodriguez",
       role: "Home Stylist",
     },
-  ]
+  ];
 
   useEffect(() => {
-    setIsVisible(true)
+    setIsVisible(true);
 
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % featuredProducts.length)
-    }, 5000)
+      setCurrentSlide((prev) => (prev + 1) % featuredProducts.length);
+    }, 5000);
 
-    return () => clearInterval(interval)
-  }, [featuredProducts.length])
+    return () => clearInterval(interval);
+  }, [featuredProducts.length]);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % featuredProducts.length)
-  }
+    setCurrentSlide((prev) => (prev + 1) % featuredProducts.length);
+  };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + featuredProducts.length) % featuredProducts.length)
-  }
+    setCurrentSlide(
+      (prev) => (prev - 1 + featuredProducts.length) % featuredProducts.length,
+    );
+  };
 
   return (
     <>
@@ -108,15 +114,18 @@ export default function Home() {
             transition={{ duration: 0.8 }}
             className="space-y-6"
           >
-            <span className="text-accent-green text-sm tracking-wider">ARTISANAL CERAMICS</span>
+            <span className="text-accent-green text-sm tracking-wider">
+              ARTISANAL CERAMICS
+            </span>
             <h1 className="text-8xl font-display text-white leading-tight">
               Ceramic
               <br />
               Design
             </h1>
             <p className="text-white/60 max-w-md">
-              Discover our collection of handcrafted ceramic pieces, each telling a unique story through traditional
-              craftsmanship and contemporary design.
+              Discover our collection of handcrafted ceramic pieces, each
+              telling a unique story through traditional craftsmanship and
+              contemporary design.
             </p>
             <div className="flex gap-4">
               <Link
@@ -151,7 +160,11 @@ export default function Home() {
 
           {/* Product Markers */}
           {markers.map((marker) => (
-            <div key={marker.id} className="absolute" style={{ left: `${marker.x}%`, top: `${marker.y}%` }}>
+            <div
+              key={marker.id}
+              className="absolute"
+              style={{ left: `${marker.x}%`, top: `${marker.y}%` }}
+            >
               <button
                 className="relative z-10 group"
                 onMouseEnter={() => setActiveMarker(marker.id)}
@@ -167,9 +180,16 @@ export default function Home() {
                     className="absolute left-full ml-4 bg-dark-800/90 backdrop-blur-sm text-white p-4 rounded-lg w-48"
                   >
                     <h3 className="font-medium mb-1">{marker.title}</h3>
-                    <p className="text-sm text-white/60 mb-2">{marker.description}</p>
-                    <p className="text-accent-green font-medium">{marker.price}</p>
-                    <Link href="/products/1" className="mt-2 text-xs text-white/80 hover:text-white flex items-center">
+                    <p className="text-sm text-white/60 mb-2">
+                      {marker.description}
+                    </p>
+                    <p className="text-accent-green font-medium">
+                      {marker.price}
+                    </p>
+                    <Link
+                      href="/products/1"
+                      className="mt-2 text-xs text-white/80 hover:text-white flex items-center"
+                    >
                       View Details <ChevronRight className="ml-1 w-3 h-3" />
                     </Link>
                   </motion.div>
@@ -217,8 +237,12 @@ export default function Home() {
               transition={{ duration: 0.5 }}
               className="absolute bottom-20 left-8 bg-dark-800/70 backdrop-blur-sm p-4 rounded-lg max-w-xs"
             >
-              <h3 className="text-white font-medium">{featuredProducts[currentSlide].name}</h3>
-              <p className="text-white/60 text-sm mt-1">{featuredProducts[currentSlide].price}</p>
+              <h3 className="text-white font-medium">
+                {featuredProducts[currentSlide].name}
+              </h3>
+              <p className="text-white/60 text-sm mt-1">
+                {featuredProducts[currentSlide].price}
+              </p>
             </motion.div>
           </AnimatePresence>
         </div>
@@ -229,10 +253,17 @@ export default function Home() {
         <div className="container mx-auto px-8">
           <div className="flex justify-between items-end mb-12">
             <div>
-              <span className="text-accent-green text-sm tracking-wider">CURATED SELECTION</span>
-              <h2 className="text-4xl font-display text-white mt-2">Featured Collection</h2>
+              <span className="text-accent-green text-sm tracking-wider">
+                CURATED SELECTION
+              </span>
+              <h2 className="text-4xl font-display text-white mt-2">
+                Featured Collection
+              </h2>
             </div>
-            <Link href="/products" className="text-white/70 hover:text-white flex items-center transition-colors">
+            <Link
+              href="/products"
+              className="text-white/70 hover:text-white flex items-center transition-colors"
+            >
               View All <ArrowRight className="ml-2 w-4 h-4" />
             </Link>
           </div>
@@ -268,8 +299,12 @@ export default function Home() {
       {/* Testimonials */}
       <section className="bg-dark-900 py-20">
         <div className="container mx-auto px-8">
-          <span className="text-accent-green text-sm tracking-wider">WHAT PEOPLE SAY</span>
-          <h2 className="text-4xl font-display text-white mt-2 mb-12">Testimonials</h2>
+          <span className="text-accent-green text-sm tracking-wider">
+            WHAT PEOPLE SAY
+          </span>
+          <h2 className="text-4xl font-display text-white mt-2 mb-12">
+            Testimonials
+          </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
@@ -280,7 +315,11 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: index * 0.1 + 0.3 }}
                 className="bg-dark-800 p-6 rounded-lg"
               >
-                <svg className="w-8 h-8 text-accent-green mb-4" fill="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-8 h-8 text-accent-green mb-4"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
                 </svg>
                 <p className="text-white/80 mb-4">{testimonial.quote}</p>
@@ -298,10 +337,15 @@ export default function Home() {
       <section className="bg-dark-800 py-20">
         <div className="container mx-auto px-8">
           <div className="max-w-2xl mx-auto text-center">
-            <span className="text-accent-green text-sm tracking-wider">STAY UPDATED</span>
-            <h2 className="text-4xl font-display text-white mt-2 mb-4">Join Our Newsletter</h2>
+            <span className="text-accent-green text-sm tracking-wider">
+              STAY UPDATED
+            </span>
+            <h2 className="text-4xl font-display text-white mt-2 mb-4">
+              Join Our Newsletter
+            </h2>
             <p className="text-white/60 mb-8">
-              Subscribe to receive updates on new collections, artisan stories, and exclusive offers.
+              Subscribe to receive updates on new collections, artisan stories,
+              and exclusive offers.
             </p>
             <div className="flex">
               <input
@@ -320,9 +364,16 @@ export default function Home() {
       {/* Featured In */}
       <section className="bg-dark-900 py-16 border-t border-dark-700">
         <div className="container mx-auto px-8">
-          <p className="text-center text-white/40 mb-8 text-sm tracking-wider">AS SEEN IN</p>
+          <p className="text-center text-white/40 mb-8 text-sm tracking-wider">
+            AS SEEN IN
+          </p>
           <div className="flex justify-center items-center flex-wrap gap-12">
-            {["DESIGN WEEK", "CERAMIC REVIEW", "ARTISAN JOURNAL", "HOME & STYLE"].map((brand, index) => (
+            {[
+              "DESIGN WEEK",
+              "CERAMIC REVIEW",
+              "ARTISAN JOURNAL",
+              "HOME & STYLE",
+            ].map((brand, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0 }}
@@ -337,6 +388,5 @@ export default function Home() {
         </div>
       </section>
     </>
-  )
+  );
 }
-

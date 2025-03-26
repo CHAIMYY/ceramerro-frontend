@@ -1,33 +1,44 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
-import axios from "axios"
-import Image from "next/image"
-import { useToast } from "@/hooks/use-toast"
-import { ShoppingCart, Minus, Plus, Check, ArrowLeft, Star, Package, Truck, RefreshCw, ImageIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import axios from "axios";
+import Image from "next/image";
+import { useToast } from "@/hooks/use-toast";
+import {
+  ShoppingCart,
+  Minus,
+  Plus,
+  Check,
+  ArrowLeft,
+  Star,
+  Package,
+  Truck,
+  RefreshCw,
+  ImageIcon,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 export default function ProductDetailsPage() {
-  const params = useParams()
-  const router = useRouter()
-  const { toast } = useToast()
-  const [product, setProduct] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [quantity, setQuantity] = useState(1)
-  const [selectedImage, setSelectedImage] = useState(0)
-  const [isAddingToCart, setIsAddingToCart] = useState(false)
-  const [addedToCart, setAddedToCart] = useState(false)
+  const params = useParams();
+  const router = useRouter();
+  const { toast } = useToast();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [addedToCart, setAddedToCart] = useState(false);
 
   // Get token from localStorage
   const getToken = () => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("token")
+      return localStorage.getItem("token");
     }
-    return null
-  }
+    return null;
+  };
 
   // Create axios instance with auth header
   const api = axios.create({
@@ -35,50 +46,56 @@ export default function ProductDetailsPage() {
     headers: {
       "Content-Type": "application/json",
     },
-  })
+  });
 
   // Add auth token to every request
   api.interceptors.request.use((config) => {
-    const token = getToken()
+    const token = getToken();
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return config
-  })
+    return config;
+  });
 
   // Update the fetchProduct function to use a regular axios call without authentication
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        setLoading(true)
+        setLoading(true);
         // Use regular axios for public product data
-        const response = await axios.get(`http://localhost:3001/api/product/product/${params.id}`)
-        setProduct(response.data)
-        setError(null)
+        const response = await axios.get(
+          `http://localhost:3001/api/product/product/${params.id}`,
+        );
+        setProduct(response.data);
+        setError(null);
       } catch (err) {
-        console.error("Error fetching product:", err)
-        setError("Failed to load product details. Please try again.")
+        console.error("Error fetching product:", err);
+        setError("Failed to load product details. Please try again.");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
     if (params.id) {
-      fetchProduct()
+      fetchProduct();
     }
-  }, [params.id])
+   
+    
+  }, [params.id]);
+
+  // console.log("prooooooo",product?.userId?.firstname);
 
   const incrementQuantity = () => {
     if (product && quantity < product.stock) {
-      setQuantity(quantity + 1)
+      setQuantity(quantity + 1);
     }
-  }
+  };
 
   const decrementQuantity = () => {
     if (quantity > 1) {
-      setQuantity(quantity - 1)
+      setQuantity(quantity - 1);
     }
-  }
+  };
 
   // Keep the handleAddToCart function with authentication check
   const handleAddToCart = async () => {
@@ -87,47 +104,47 @@ export default function ProductDetailsPage() {
         title: "Authentication required",
         description: "Please log in to add items to your cart",
         type: "error",
-      })
-      router.push("/login")
-      return
+      });
+      router.push("/login");
+      return;
     }
 
-    setIsAddingToCart(true)
+    setIsAddingToCart(true);
 
     try {
       await api.post("/cart/add", {
         productId: product._id,
         quantity: quantity,
-      })
+      });
 
-      setAddedToCart(true)
+      setAddedToCart(true);
 
       toast({
         title: "Added to cart",
         description: `${product.nom} has been added to your cart`,
         type: "success",
-      })
+      });
 
       setTimeout(() => {
-        setAddedToCart(false)
-      }, 3000)
+        setAddedToCart(false);
+      }, 3000);
     } catch (error) {
-      console.error("Failed to add to cart:", error)
+      console.error("Failed to add to cart:", error);
 
-      let errorMessage = "Failed to add to cart. Please try again."
+      let errorMessage = "Failed to add to cart. Please try again.";
       if (error.response && error.response.data.message) {
-        errorMessage = error.response.data.message
+        errorMessage = error.response.data.message;
       }
 
       toast({
         title: "Error",
         description: errorMessage,
         type: "error",
-      })
+      });
     } finally {
-      setIsAddingToCart(false)
+      setIsAddingToCart(false);
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -139,7 +156,7 @@ export default function ProductDetailsPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -149,7 +166,10 @@ export default function ProductDetailsPage() {
           <div className="flex flex-col items-center justify-center h-64">
             <div className="bg-red-900/20 p-6 rounded-lg border border-red-900 max-w-md mx-auto text-center">
               <p className="text-red-400 mb-4">{error}</p>
-              <Button onClick={() => router.back()} className="bg-dark-800 text-white hover:bg-dark-700">
+              <Button
+                onClick={() => router.back()}
+                className="bg-dark-800 text-white hover:bg-dark-700"
+              >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Go Back
               </Button>
@@ -157,7 +177,7 @@ export default function ProductDetailsPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (!product) {
@@ -166,14 +186,17 @@ export default function ProductDetailsPage() {
         <div className="container mx-auto px-4 py-16">
           <div className="flex flex-col items-center justify-center h-64">
             <p className="text-white">Product not found</p>
-            <Button onClick={() => router.back()} className="bg-dark-800 text-white hover:bg-dark-700 mt-4">
+            <Button
+              onClick={() => router.back()}
+              className="bg-dark-800 text-white hover:bg-dark-700 mt-4"
+            >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Go Back
             </Button>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -217,7 +240,9 @@ export default function ProductDetailsPage() {
                     key={index}
                     onClick={() => setSelectedImage(index)}
                     className={`relative w-20 h-20 rounded-md overflow-hidden flex-shrink-0 border-2 ${
-                      selectedImage === index ? "border-accent-green" : "border-transparent"
+                      selectedImage === index
+                        ? "border-accent-green"
+                        : "border-transparent"
                     }`}
                   >
                     <Image
@@ -235,7 +260,9 @@ export default function ProductDetailsPage() {
           {/* Product Info */}
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2">{product.nom}</h1>
+              <h1 className="text-3xl font-bold text-white mb-2">
+                {product.nom}
+              </h1>
 
               <div className="flex items-center gap-4 mb-4">
                 <div className="flex items-center">
@@ -252,7 +279,9 @@ export default function ProductDetailsPage() {
                 </Badge>
               </div>
 
-              <div className="text-3xl font-bold text-accent-green mb-6">${product.prix?.toFixed(2)}</div>
+              <div className="text-3xl font-bold text-accent-green mb-6">
+                ${product.prix?.toFixed(2)}
+              </div>
 
               <div className="prose prose-invert max-w-none mb-8">
                 <p className="text-white/80">{product.description}</p>
@@ -268,7 +297,9 @@ export default function ProductDetailsPage() {
                 <div>
                   <p className="text-white font-medium">Availability</p>
                   {product.stock > 0 ? (
-                    <p className="text-green-400">In Stock ({product.stock} available)</p>
+                    <p className="text-green-400">
+                      In Stock ({product.stock} available)
+                    </p>
                   ) : (
                     <p className="text-red-400">Out of Stock</p>
                   )}
@@ -281,7 +312,9 @@ export default function ProductDetailsPage() {
                 </div>
                 <div>
                   <p className="text-white font-medium">Shipping</p>
-                  <p className="text-white/60">Free shipping on orders over $100</p>
+                  <p className="text-white/60">
+                    Free shipping on orders over $100
+                  </p>
                 </div>
               </div>
             </div>
@@ -297,7 +330,9 @@ export default function ProductDetailsPage() {
                   >
                     <Minus className="h-4 w-4" />
                   </button>
-                  <div className="w-14 h-10 flex items-center justify-center bg-dark-800 text-white">{quantity}</div>
+                  <div className="w-14 h-10 flex items-center justify-center bg-dark-800 text-white">
+                    {quantity}
+                  </div>
                   <button
                     onClick={incrementQuantity}
                     disabled={product.stock <= quantity}
@@ -338,14 +373,16 @@ export default function ProductDetailsPage() {
             {/* Product Details */}
             {(product.dimensions || product.weight) && (
               <div className="border-t border-dark-700 pt-6">
-                <h3 className="text-lg font-medium text-white mb-4">Product Details</h3>
+                <h3 className="text-lg font-medium text-white mb-4">
+                  Product Details
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {product.dimensions && (
                     <div>
                       <p className="text-white/60 mb-1">Dimensions</p>
                       <p className="text-white">
-                        {product.dimensions.height} × {product.dimensions.width} × {product.dimensions.depth}{" "}
-                        {product.dimensions.unit}
+                        {product.dimensions.height} × {product.dimensions.width}{" "}
+                        × {product.dimensions.depth} {product.dimensions.unit}
                       </p>
                     </div>
                   )}
@@ -368,14 +405,16 @@ export default function ProductDetailsPage() {
                 <h3 className="text-lg font-medium text-white mb-4">Artisan</h3>
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-dark-800 flex items-center justify-center text-white font-bold">
-                    {product.artisanName ? product.artisanName[0] : "A"}
+                    {product.userId?.firstname ? product.userId?.firstname[0] : "A"}
                   </div>
                   <div>
-                    <p className="text-white font-medium">{product.artisanName || "Artisan"}</p>
+                    <p className="text-white font-medium">
+                      {product.userId?.firstname || "Artisan"}
+                    </p>
                     <Button
                       variant="link"
                       className="p-0 h-auto text-accent-green hover:text-accent-green/80"
-                      onClick={() => router.push(`/artisan/${product.userId}`)}
+                      onClick={() => router.push(`/artisans/${product.userId}`)}
                     >
                       View Profile
                     </Button>
@@ -387,6 +426,5 @@ export default function ProductDetailsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

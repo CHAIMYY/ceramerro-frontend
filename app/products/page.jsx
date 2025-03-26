@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select } from "@/components/ui/select"
-import ProductCard from "../components/ProductCard"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import ProductCard from "../components/ProductCard";
 
 export default function ProductCatalog() {
   return (
@@ -50,6 +50,5 @@ export default function ProductCatalog() {
         <Button variant="outline">Next</Button>
       </div>
     </div>
-  )
+  );
 }
-

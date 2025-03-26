@@ -1,8 +1,23 @@
-import { Card } from "@/components/ui/card"
-import DashboardLayout from "../app/components/dashboard/DashboardLayout"
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-import { Button } from "@/components/ui/button"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Card } from "@/components/ui/card";
+import DashboardLayout from "../app/components/dashboard/DashboardLayout";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const data = [
   { name: "Jan", sales: 1200, orders: 800 },
@@ -11,13 +26,31 @@ const data = [
   { name: "Apr", sales: 1700, orders: 1100 },
   { name: "May", sales: 2000, orders: 1300 },
   { name: "Jun", sales: 2400, orders: 1500 },
-]
+];
 
 const recentOrders = [
-  { id: "1", product: "Ceramic Vase", customer: "John Doe", status: "Pending", amount: "$120" },
-  { id: "2", product: "Clay Pot", customer: "Jane Smith", status: "Shipped", amount: "$85" },
-  { id: "3", product: "Tea Set", customer: "Bob Johnson", status: "Delivered", amount: "$250" },
-]
+  {
+    id: "1",
+    product: "Ceramic Vase",
+    customer: "John Doe",
+    status: "Pending",
+    amount: "$120",
+  },
+  {
+    id: "2",
+    product: "Clay Pot",
+    customer: "Jane Smith",
+    status: "Shipped",
+    amount: "$85",
+  },
+  {
+    id: "3",
+    product: "Tea Set",
+    customer: "Bob Johnson",
+    status: "Delivered",
+    amount: "$250",
+  },
+];
 
 export default function SellerDashboard() {
   return (
@@ -44,7 +77,9 @@ export default function SellerDashboard() {
 
         {/* Sales Chart */}
         <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4 text-plum">Sales Performance</h3>
+          <h3 className="text-lg font-semibold mb-4 text-plum">
+            Sales Performance
+          </h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -102,6 +137,5 @@ export default function SellerDashboard() {
         </Card>
       </div>
     </DashboardLayout>
-  )
+  );
 }
-

@@ -1,26 +1,33 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import Image from "next/image"
-import Link from "next/link"
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, CreditCard } from "lucide-react"
-import axios from "axios"
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  Trash2,
+  Plus,
+  Minus,
+  ShoppingBag,
+  ArrowRight,
+  CreditCard,
+} from "lucide-react";
+import axios from "axios";
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [orderSuccess, setOrderSuccess] = useState(false)
-  const [error, setError] = useState("")
+  const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [orderSuccess, setOrderSuccess] = useState(false);
+  const [error, setError] = useState("");
 
   // Get token from localStorage
   const getToken = () => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("token")
+      return localStorage.getItem("token");
     }
-    return null
-  }
+    return null;
+  };
 
   // Create axios instance with auth header
   const api = axios.create({
@@ -28,79 +35,82 @@ export default function CartPage() {
     headers: {
       "Content-Type": "application/json",
     },
-  })
+  });
 
   // Add auth token to every request
   api.interceptors.request.use((config) => {
-    const token = getToken()
+    const token = getToken();
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return config
-  })
+    return config;
+  });
 
   useEffect(() => {
-    fetchCart()
-  }, [])
+    fetchCart();
+  }, []);
 
   const fetchCart = async () => {
     try {
-      setLoading(true)
-      const response = await api.get("/cart/")
-      setCartItems(response.data)
-      setError("")
+      setLoading(true);
+      const response = await api.get("/cart/");
+      setCartItems(response.data);
+      setError("");
     } catch (error) {
-      console.error("Failed to fetch cart:", error)
+      console.error("Failed to fetch cart:", error);
       if (error.response && error.response.status === 401) {
-        setError("Please log in to view your cart")
+        setError("Please log in to view your cart");
       } else {
-        setError("Failed to load your cart. Please try again.")
+        setError("Failed to load your cart. Please try again.");
       }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const updateQuantity = async (id, newQuantity) => {
-    if (newQuantity < 1) return
+    if (newQuantity < 1) return;
 
     try {
       const response = await api.put("/cart/update", {
         productId: id,
         quantity: newQuantity,
-      })
+      });
 
-      setCartItems(response.data)
-      setError("")
+      setCartItems(response.data);
+      setError("");
     } catch (error) {
-      console.error("Failed to update quantity:", error)
+      console.error("Failed to update quantity:", error);
       if (error.response && error.response.data.message) {
-        setError(error.response.data.message)
+        setError(error.response.data.message);
       } else {
-        setError("Failed to update quantity. Please try again.")
+        setError("Failed to update quantity. Please try again.");
       }
     }
-  }
+  };
 
   const removeItem = async (id) => {
     try {
-      const response = await api.delete(`/cart/remove/${id}`)
-      setCartItems(response.data)
-      setError("")
+      const response = await api.delete(`/cart/remove/${id}`);
+      setCartItems(response.data);
+      setError("");
     } catch (error) {
-      console.error("Failed to remove item:", error)
-      setError("Failed to remove item. Please try again.")
+      console.error("Failed to remove item:", error);
+      setError("Failed to remove item. Please try again.");
     }
-  }
+  };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const shipping = 12.99
-  const tax = subtotal * 0.08
-  const total = subtotal + shipping + tax
+  const subtotal = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
+  const shipping = 12.99;
+  const tax = subtotal * 0.08;
+  const total = subtotal + shipping + tax;
 
   const handlePlaceOrder = async () => {
-    setIsProcessing(true)
-    setError("")
+    setIsProcessing(true);
+    setError("");
 
     try {
       // Prepare order data with the fixed values
@@ -113,30 +123,34 @@ export default function CartPage() {
         city: "New York",
         country: "USA",
         zipCode: "10001",
-        paymentMethod: "paypal"
-      }
+        paymentMethod: "paypal",
+      };
 
       // Send order to API
-      await api.post("/order/placeOrder", orderData)
+      await api.post("/order/placeOrder", orderData);
 
       // Order successful
-      setOrderSuccess(true)
+      setOrderSuccess(true);
     } catch (error) {
-      console.error("Failed to place order:", error)
+      console.error("Failed to place order:", error);
       if (error.response && error.response.data.message) {
-        setError(error.response.data.message)
+        setError(error.response.data.message);
       } else {
-        setError("Failed to place your order. Please try again.")
+        setError("Failed to place your order. Please try again.");
       }
     } finally {
-      setIsProcessing(false)
+      setIsProcessing(false);
     }
-  }
+  };
 
   return (
     <div className="pt-24 bg-dark-900 min-h-screen">
       <div className="container mx-auto px-8 py-16">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
           <h1 className="text-4xl font-display text-white mb-12">Your Cart</h1>
 
           {loading ? (
@@ -151,7 +165,9 @@ export default function CartPage() {
             <div className="text-center py-16">
               <ShoppingBag className="w-16 h-16 text-white/30 mx-auto mb-6" />
               <h2 className="text-2xl text-white mb-4">Your cart is empty</h2>
-              <p className="text-white/70 mb-8">Looks like you haven't added any items to your cart yet.</p>
+              <p className="text-white/70 mb-8">
+                Looks like you haven't added any items to your cart yet.
+              </p>
               <Link
                 href="/shop"
                 className="inline-block bg-accent-green text-dark-900 px-6 py-3 rounded-md font-medium hover:bg-accent-green/90 transition-colors"
@@ -164,11 +180,16 @@ export default function CartPage() {
               <div className="w-16 h-16 bg-accent-green rounded-full flex items-center justify-center mx-auto mb-6">
                 <CreditCard className="w-8 h-8 text-dark-900" />
               </div>
-              <h2 className="text-2xl text-white mb-4">Order Placed Successfully!</h2>
+              <h2 className="text-2xl text-white mb-4">
+                Order Placed Successfully!
+              </h2>
               <p className="text-white/70 mb-8">
-                Thank you for your order. We'll send you a confirmation email shortly.
+                Thank you for your order. We'll send you a confirmation email
+                shortly.
               </p>
-              <p className="text-white/70 mb-8">Order Total: ${total.toFixed(2)}</p>
+              <p className="text-white/70 mb-8">
+                Order Total: ${total.toFixed(2)}
+              </p>
               <Link
                 href="/shop"
                 className="inline-block bg-accent-green text-dark-900 px-6 py-3 rounded-md font-medium hover:bg-accent-green/90 transition-colors"
@@ -182,24 +203,40 @@ export default function CartPage() {
               <div className="lg:col-span-2">
                 <div className="bg-dark-800 rounded-lg overflow-hidden">
                   <div className="p-6 border-b border-dark-700">
-                    <h2 className="text-xl text-white">Shopping Cart ({cartItems.length} items)</h2>
+                    <h2 className="text-xl text-white">
+                      Shopping Cart ({cartItems.length} items)
+                    </h2>
                   </div>
 
                   <div className="divide-y divide-dark-700">
                     {cartItems.map((item) => (
-                      <div key={item.id} className="p-6 flex flex-col md:flex-row items-start md:items-center">
+                      <div
+                        key={item.id}
+                        className="p-6 flex flex-col md:flex-row items-start md:items-center"
+                      >
                         <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 mb-4 md:mb-0">
-                          <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
+                          <Image
+                            src={item.image || "/placeholder.svg"}
+                            alt={item.name}
+                            fill
+                            className="object-cover"
+                          />
                         </div>
 
                         <div className="md:ml-6 flex-grow">
-                          <h3 className="text-white font-medium">{item.name}</h3>
-                          <p className="text-accent-green mt-1">${item.price.toFixed(2)}</p>
+                          <h3 className="text-white font-medium">
+                            {item.name}
+                          </h3>
+                          <p className="text-accent-green mt-1">
+                            ${item.price.toFixed(2)}
+                          </p>
                         </div>
 
                         <div className="flex items-center mt-4 md:mt-0">
                           <button
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            onClick={() =>
+                              updateQuantity(item.id, item.quantity - 1)
+                            }
                             className="w-8 h-8 flex items-center justify-center bg-dark-700 text-white rounded-l-md hover:bg-dark-600 transition-colors"
                           >
                             <Minus className="w-4 h-4" />
@@ -208,7 +245,9 @@ export default function CartPage() {
                             {item.quantity}
                           </div>
                           <button
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            onClick={() =>
+                              updateQuantity(item.id, item.quantity + 1)
+                            }
                             className="w-8 h-8 flex items-center justify-center bg-dark-700 text-white rounded-r-md hover:bg-dark-600 transition-colors"
                           >
                             <Plus className="w-4 h-4" />
@@ -253,8 +292,12 @@ export default function CartPage() {
                     </div>
 
                     <div className="p-4 bg-dark-700 rounded-md">
-                      <p className="text-white/70 text-sm mb-2">Delivery Information:</p>
-                      <p className="text-white text-sm">Address: 123 Main Street, NY</p>
+                      <p className="text-white/70 text-sm mb-2">
+                        Delivery Information:
+                      </p>
+                      <p className="text-white text-sm">
+                        Address: 123 Main Street, NY
+                      </p>
                       <p className="text-white text-sm">Payment: PayPal</p>
                     </div>
 
@@ -262,7 +305,9 @@ export default function CartPage() {
                       onClick={handlePlaceOrder}
                       disabled={isProcessing}
                       className={`w-full bg-accent-green text-dark-900 py-3 rounded-md font-medium transition-colors ${
-                        isProcessing ? "opacity-70 cursor-not-allowed" : "hover:bg-accent-green/90"
+                        isProcessing
+                          ? "opacity-70 cursor-not-allowed"
+                          : "hover:bg-accent-green/90"
                       }`}
                     >
                       {isProcessing ? "Processing..." : "Place Order"}
@@ -289,5 +334,5 @@ export default function CartPage() {
         </motion.div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,27 +1,27 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { motion } from "framer-motion"
-import { ShoppingCart, Eye, Check } from "lucide-react"
-import axios from "axios"
-import { useToast } from "@/hooks/use-toast"
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { ShoppingCart, Eye, Check } from "lucide-react";
+import axios from "axios";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ProductCard({ product }) {
-  const router = useRouter()
-  const { toast } = useToast()
-  const [isAddingToCart, setIsAddingToCart] = useState(false)
-  const [addedToCart, setAddedToCart] = useState(false)
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [addedToCart, setAddedToCart] = useState(false);
 
   // Get token from localStorage
   const getToken = () => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("token")
+      return localStorage.getItem("token");
     }
-    return null
-  }
+    return null;
+  };
 
   // Create axios instance with auth header
   const api = axios.create({
@@ -29,29 +29,29 @@ export default function ProductCard({ product }) {
     headers: {
       "Content-Type": "application/json",
     },
-  })
+  });
 
   // Add auth token to every request
   api.interceptors.request.use((config) => {
-    const token = getToken()
+    const token = getToken();
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return config
-  })
+    return config;
+  });
 
   const handleAddToCart = async (e) => {
-    e.preventDefault()
-    e.stopPropagation()
+    e.preventDefault();
+    e.stopPropagation();
 
     if (!getToken()) {
       toast({
         title: "Authentication required",
         description: "Please log in to add items to your cart",
         type: "error",
-      })
-      router.push("/login")
-      return
+      });
+      router.push("/login");
+      return;
     }
 
     if (product.stock <= 0) {
@@ -59,49 +59,52 @@ export default function ProductCard({ product }) {
         title: "Out of stock",
         description: "This product is currently out of stock",
         type: "error",
-      })
-      return
+      });
+      return;
     }
 
-    setIsAddingToCart(true)
+    setIsAddingToCart(true);
 
     try {
       await api.post("/cart/add", {
         productId: product._id,
         quantity: 1,
-      })
+      });
 
-      setAddedToCart(true)
+      setAddedToCart(true);
 
       toast({
         title: "Added to cart",
         description: `${product.nom} has been added to your cart`,
         type: "success",
-      })
+      });
 
       setTimeout(() => {
-        setAddedToCart(false)
-      }, 2000)
+        setAddedToCart(false);
+      }, 2000);
     } catch (error) {
-      console.error("Failed to add to cart:", error)
+      console.error("Failed to add to cart:", error);
 
-      let errorMessage = "Failed to add to cart. Please try again."
+      let errorMessage = "Failed to add to cart. Please try again.";
       if (error.response && error.response.data.message) {
-        errorMessage = error.response.data.message
+        errorMessage = error.response.data.message;
       }
 
       toast({
         title: "Error",
         description: errorMessage,
         type: "error",
-      })
+      });
     } finally {
-      setIsAddingToCart(false)
+      setIsAddingToCart(false);
     }
-  }
+  };
 
   return (
-    <motion.div whileHover={{ y: -5 }} className="bg-dark-800 rounded-lg overflow-hidden">
+    <motion.div
+      whileHover={{ y: -5 }}
+      className="bg-dark-800 rounded-lg overflow-hidden"
+    >
       <div className="relative overflow-hidden group">
         <Image
           src={
@@ -153,9 +156,10 @@ export default function ProductCard({ product }) {
         </Link>
         <p className="text-accent-green mb-2">${product?.prix?.toFixed(2)}</p>
         <p className="text-sm text-white/60">{product?.category}</p>
-        {product?.stock <= 0 && <p className="text-red-500 text-sm mt-1">Out of Stock</p>}
+        {product?.stock <= 0 && (
+          <p className="text-red-500 text-sm mt-1">Out of Stock</p>
+        )}
       </div>
     </motion.div>
-  )
+  );
 }
-

@@ -1,11 +1,18 @@
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Search } from "lucide-react"
-import Image from "next/image"
-import DashboardLayout from "../../app/components/dashboard/DashboardLayout"
-import Link from "next/link"
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Plus, Search } from "lucide-react";
+import Image from "next/image";
+import DashboardLayout from "../../app/components/dashboard/DashboardLayout";
+import Link from "next/link";
 
 const products = [
   {
@@ -32,7 +39,7 @@ const products = [
     stock: 0,
     status: "Out of Stock",
   },
-]
+];
 
 export default function SellerProducts() {
   return (
@@ -52,7 +59,10 @@ export default function SellerProducts() {
           <div className="flex gap-4 mb-6">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3 w-4 h-4 text-plum/40" />
-              <Input placeholder="Search products..." className="pl-10 bg-lavender/50 border-orchid/20" />
+              <Input
+                placeholder="Search products..."
+                className="pl-10 bg-lavender/50 border-orchid/20"
+              />
             </div>
             <Button variant="outline" className="text-plum hover:text-orchid">
               Filter
@@ -88,7 +98,9 @@ export default function SellerProducts() {
                   <TableCell>
                     <span
                       className={`px-2 py-1 rounded-full text-xs ${
-                        product.status === "Active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                        product.status === "Active"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
                       }`}
                     >
                       {product.status}
@@ -96,10 +108,18 @@ export default function SellerProducts() {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="text-plum hover:text-orchid">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-plum hover:text-orchid"
+                      >
                         Edit
                       </Button>
-                      <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700"
+                      >
                         Delete
                       </Button>
                     </div>
@@ -111,6 +131,5 @@ export default function SellerProducts() {
         </Card>
       </div>
     </DashboardLayout>
-  )
+  );
 }
-

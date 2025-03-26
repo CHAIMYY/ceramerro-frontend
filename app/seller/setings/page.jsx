@@ -1,27 +1,40 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { PlusCircle, Trash2, Upload, X } from "lucide-react"
-import Image from "next/image"
-import axios from "axios"
-import { toast } from "@/components/ui/use-toast" // Assuming you have toast component from shadcn/ui
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { PlusCircle, Trash2, Upload, X } from "lucide-react";
+import Image from "next/image";
+import axios from "axios";
+import { toast } from "@/components/ui/use-toast"; // Assuming you have toast component from shadcn/ui
 
 // API service for profile-related operations
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/artisan';
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/artisan";
 
 // Set auth token for requests
 const setAuthToken = (token) => {
   if (token) {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   } else {
-    delete axios.defaults.headers.common['Authorization'];
+    delete axios.defaults.headers.common["Authorization"];
   }
 };
 
@@ -31,7 +44,10 @@ const getProfile = async () => {
     const response = await axios.get(`${API_URL}/profile`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching profile:', error.response?.data || error.message);
+    console.error(
+      "Error fetching profile:",
+      error.response?.data || error.message,
+    );
     throw error;
   }
 };
@@ -42,7 +58,10 @@ const updateProfile = async (profileData) => {
     const response = await axios.put(`${API_URL}/updateProfile`, profileData);
     return response.data;
   } catch (error) {
-    console.error('Error updating profile:', error.response?.data || error.message);
+    console.error(
+      "Error updating profile:",
+      error.response?.data || error.message,
+    );
     throw error;
   }
 };
@@ -66,9 +85,9 @@ export default function SettingsPage() {
       facebook: "",
       twitter: "",
     },
-    process: []
+    process: [],
   });
-  
+
   const [newProcess, setNewProcess] = useState({
     title: "",
     description: "",
@@ -79,19 +98,19 @@ export default function SettingsPage() {
     const fetchProfile = async () => {
       try {
         // Get token from localStorage
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (!token) {
           setError("Authentication required");
           setLoading(false);
           return;
         }
-        
+
         // Set token in axios headers
         setAuthToken(token);
-        
+
         // Fetch profile data
         const data = await getProfile();
-        
+
         if (data.user) {
           // Transform backend data model to frontend model if needed
           const profileData = {
@@ -111,9 +130,9 @@ export default function SettingsPage() {
               facebook: data.user.socialMedia?.facebook || "",
               twitter: data.user.socialMedia?.twitter || "",
             },
-            process: data.user.process || []
+            process: data.user.process || [],
           };
-          
+
           setArtisan(profileData);
         }
       } catch (err) {
@@ -123,7 +142,7 @@ export default function SettingsPage() {
         setLoading(false);
       }
     };
-    
+
     fetchProfile();
   }, []);
 
@@ -133,12 +152,12 @@ export default function SettingsPage() {
       const nameParts = value.split(" ");
       const firstname = nameParts[0] || "";
       const lastname = nameParts.slice(1).join(" ") || "";
-      
+
       setArtisan({
         ...artisan,
         name: value,
         firstname,
-        lastname
+        lastname,
       });
     } else {
       setArtisan({
@@ -197,7 +216,7 @@ export default function SettingsPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       // Prepare data for API
       const profileData = {
@@ -212,34 +231,34 @@ export default function SettingsPage() {
         socialMedia: artisan.socialMedia,
         image: artisan.image,
         gallery: artisan.gallery,
-        process: artisan.process
+        process: artisan.process,
       };
-      
+
       // Send data to API
       const result = await updateProfile(profileData);
-      
+
       // Show success message
-      if (typeof toast !== 'undefined') {
+      if (typeof toast !== "undefined") {
         toast({
           title: "Success",
           description: "Profile updated successfully!",
-          duration: 3000
+          duration: 3000,
         });
       } else {
         alert("Profile updated successfully!");
       }
-      
+
       console.log("Profile updated:", result);
     } catch (err) {
       console.error("Error updating profile:", err);
-      
+
       // Show error message
-      if (typeof toast !== 'undefined') {
+      if (typeof toast !== "undefined") {
         toast({
           title: "Error",
           description: "Failed to update profile. Please try again.",
           variant: "destructive",
-          duration: 3000
+          duration: 3000,
         });
       } else {
         alert("Failed to update profile. Please try again.");
@@ -268,9 +287,9 @@ export default function SettingsPage() {
         <div className="text-center">
           <div className="bg-destructive/10 text-destructive p-4 rounded-lg">
             <p>{error}</p>
-            <Button 
-              onClick={() => window.location.reload()} 
-              variant="outline" 
+            <Button
+              onClick={() => window.location.reload()}
+              variant="outline"
               className="mt-4"
             >
               Try Again
@@ -285,7 +304,9 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Artisan Profile</h1>
-        <p className="text-muted-foreground">Update your artisan profile information</p>
+        <p className="text-muted-foreground">
+          Update your artisan profile information
+        </p>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -294,7 +315,9 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Basic Information</CardTitle>
-              <CardDescription>Update your personal and business details</CardDescription>
+              <CardDescription>
+                Update your personal and business details
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -339,12 +362,17 @@ export default function SettingsPage() {
                   required
                   maxLength={1000}
                 />
-                <p className="text-xs text-muted-foreground text-right">{artisan.bio.length}/1000 characters</p>
+                <p className="text-xs text-muted-foreground text-right">
+                  {artisan.bio.length}/1000 characters
+                </p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
-                <Select value={artisan.category} onValueChange={(value) => handleChange("category", value)}>
+                <Select
+                  value={artisan.category}
+                  onValueChange={(value) => handleChange("category", value)}
+                >
                   <SelectTrigger id="category">
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
@@ -361,7 +389,9 @@ export default function SettingsPage() {
                 <Switch
                   id="featured"
                   checked={artisan.featured}
-                  onCheckedChange={(checked) => handleChange("featured", checked)}
+                  onCheckedChange={(checked) =>
+                    handleChange("featured", checked)
+                  }
                 />
                 <Label htmlFor="featured">Featured Artisan</Label>
               </div>
@@ -377,9 +407,18 @@ export default function SettingsPage() {
             <CardContent>
               <div className="flex flex-col items-center space-y-4">
                 <div className="relative h-40 w-40 rounded-full overflow-hidden border-2 border-border">
-                  <Image src={artisan.image || "/placeholder.svg"} alt="Profile" fill className="object-cover" />
+                  <Image
+                    src={artisan.image || "/placeholder.svg"}
+                    alt="Profile"
+                    fill
+                    className="object-cover"
+                  />
                 </div>
-                <Button type="button" variant="outline" className="w-full max-w-xs">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full max-w-xs"
+                >
                   <Upload className="mr-2 h-4 w-4" />
                   Change Profile Image
                 </Button>
@@ -391,30 +430,33 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Gallery</CardTitle>
-              <CardDescription>Showcase your work with multiple images</CardDescription>
+              <CardDescription>
+                Showcase your work with multiple images
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {artisan.gallery && artisan.gallery.map((image, index) => (
-                    <div key={index} className="relative group">
-                      <div className="aspect-square relative rounded-md overflow-hidden border border-border">
-                        <Image
-                          src={image || "/placeholder.svg"}
-                          alt={`Gallery image ${index + 1}`}
-                          fill
-                          className="object-cover"
-                        />
+                  {artisan.gallery &&
+                    artisan.gallery.map((image, index) => (
+                      <div key={index} className="relative group">
+                        <div className="aspect-square relative rounded-md overflow-hidden border border-border">
+                          <Image
+                            src={image || "/placeholder.svg"}
+                            alt={`Gallery image ${index + 1}`}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeGalleryImage(index)}
+                          className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => removeGalleryImage(index)}
-                        className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
+                    ))}
                   <button
                     type="button"
                     onClick={addGalleryImage}
@@ -424,7 +466,8 @@ export default function SettingsPage() {
                   </button>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Add images of your work to showcase your craftsmanship. Recommended size: 800x800px.
+                  Add images of your work to showcase your craftsmanship.
+                  Recommended size: 800x800px.
                 </p>
               </div>
             </CardContent>
@@ -434,7 +477,9 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Social Media</CardTitle>
-              <CardDescription>Connect your social media accounts</CardDescription>
+              <CardDescription>
+                Connect your social media accounts
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -443,7 +488,9 @@ export default function SettingsPage() {
                   <Input
                     id="instagram"
                     value={artisan.socialMedia?.instagram || ""}
-                    onChange={(e) => handleSocialMediaChange("instagram", e.target.value)}
+                    onChange={(e) =>
+                      handleSocialMediaChange("instagram", e.target.value)
+                    }
                     placeholder="@username"
                   />
                 </div>
@@ -452,7 +499,9 @@ export default function SettingsPage() {
                   <Input
                     id="twitter"
                     value={artisan.socialMedia?.twitter || ""}
-                    onChange={(e) => handleSocialMediaChange("twitter", e.target.value)}
+                    onChange={(e) =>
+                      handleSocialMediaChange("twitter", e.target.value)
+                    }
                     placeholder="@username"
                   />
                 </div>
@@ -461,7 +510,9 @@ export default function SettingsPage() {
                   <Input
                     id="facebook"
                     value={artisan.socialMedia?.facebook || ""}
-                    onChange={(e) => handleSocialMediaChange("facebook", e.target.value)}
+                    onChange={(e) =>
+                      handleSocialMediaChange("facebook", e.target.value)
+                    }
                     placeholder="username or page name"
                   />
                 </div>
@@ -470,7 +521,9 @@ export default function SettingsPage() {
                   <Input
                     id="website"
                     value={artisan.socialMedia?.website || ""}
-                    onChange={(e) => handleSocialMediaChange("website", e.target.value)}
+                    onChange={(e) =>
+                      handleSocialMediaChange("website", e.target.value)
+                    }
                     placeholder="www.example.com"
                   />
                 </div>
@@ -486,5 +539,5 @@ export default function SettingsPage() {
         </div>
       </form>
     </div>
-  )
+  );
 }

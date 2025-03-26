@@ -7,7 +7,14 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/components/ui/use-toast";
@@ -24,56 +31,58 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-  
+
     try {
-      console.log('Attempting login with:', { email });
-      const response = await axios.post("http://localhost:3001/api/user/login", {
-        email,
-        password
-      });
-      
+      console.log("Attempting login with:", { email });
+      const response = await axios.post(
+        "http://localhost:3001/api/user/login",
+        {
+          email,
+          password,
+        },
+      );
+
       if (!response.data?.token) {
         throw new Error("Invalid response from server");
       }
-      
+
       // Store the token and user type in localStorage
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('userType', response.data.userType || 'artisan');
-      
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("userType", response.data.userType || "artisan");
+
       // Debug: log the userType to see what's coming from the server
-      console.log('User type from server:', response.data.userType);
-      
+      console.log("User type from server:", response.data.userType);
+
       // toast({
       //   title: "Login successful",
       //   description: "Welcome back!",
       // });
-  
+
       // Add a small delay before redirection (sometimes helps with Next.js router)
       setTimeout(() => {
         // Redirect based on user type with explicit string comparison
-        if (response.data.userType === 'admin') {
-          console.log('Redirecting to admin dashboard');
+        if (response.data.userType === "admin") {
+          console.log("Redirecting to admin dashboard");
           // router.replace('/admin');
-          router.push('/admin');
-        } else if (response.data.userType === 'client') {
-          console.log('Redirecting to shop');
-          router.push('/shop');
-        } 
-        else {
+          router.push("/admin");
+        } else if (response.data.userType === "client") {
+          console.log("Redirecting to shop");
+          router.push("/shop");
+        } else {
           // Default to artisan/seller
-          console.log('Redirecting to seller dashboard');
-          router.push('/seller');
+          console.log("Redirecting to seller dashboard");
+          router.push("/seller");
         }
       }, 100);
-    
     } catch (err) {
       // Error handling remains the same
-      console.error('Login error:', err);
-      const errorMessage = err.response?.data?.message || 
-                         err.response?.data?.error || 
-                         err.message || 
-                         "Failed to login. Please check your credentials and try again.";
-      
+      console.error("Login error:", err);
+      const errorMessage =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.message ||
+        "Failed to login. Please check your credentials and try again.";
+
       setError(errorMessage);
       // toast({
       //   title: "Login failed",
@@ -90,7 +99,9 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-plum">Login</CardTitle>
-          <CardDescription>Enter your credentials to access your account</CardDescription>
+          <CardDescription>
+            Enter your credentials to access your account
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -125,8 +136,8 @@ export default function LoginPage() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full bg-plum text-pearl hover:bg-orchid transition-colors"
               disabled={loading}
             >
@@ -141,8 +152,8 @@ export default function LoginPage() {
               Register here
             </Link>
           </p>
-          <Link 
-            href="/shop" 
+          <Link
+            href="/shop"
             className="text-sm text-plum hover:text-orchid transition-colors"
           >
             Continue shopping as guest

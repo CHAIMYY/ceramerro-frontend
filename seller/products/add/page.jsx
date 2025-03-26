@@ -1,17 +1,23 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import DashboardLayout from "../../../app/components/dashboard/DashboardLayout"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Card } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import DashboardLayout from "../../../app/components/dashboard/DashboardLayout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function AddProduct() {
-  const router = useRouter()
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -19,22 +25,22 @@ export default function AddProduct() {
     stock: "",
     category: "",
     status: "active",
-  })
+  });
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSelectChange = (name) => (value) => {
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log("Form submitted:", formData)
-    router.push("/seller/products")
-  }
+    e.preventDefault();
+    console.log("Form submitted:", formData);
+    router.push("/seller/products");
+  };
 
   return (
     <DashboardLayout role="seller">
@@ -44,25 +50,58 @@ export default function AddProduct() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <Label htmlFor="name">Product Name</Label>
-              <Input id="name" name="name" value={formData.name} onChange={handleInputChange} required className="bg-lavender/50 border-orchid/20" />
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
+                className="bg-lavender/50 border-orchid/20"
+              />
             </div>
             <div>
               <Label htmlFor="description">Description</Label>
-              <Textarea id="description" name="description" value={formData.description} onChange={handleInputChange} required className="bg-lavender/50 border-orchid/20" />
+              <Textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                required
+                className="bg-lavender/50 border-orchid/20"
+              />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="price">Price</Label>
-                <Input id="price" name="price" type="number" value={formData.price} onChange={handleInputChange} required className="bg-lavender/50 border-orchid/20" />
+                <Input
+                  id="price"
+                  name="price"
+                  type="number"
+                  value={formData.price}
+                  onChange={handleInputChange}
+                  required
+                  className="bg-lavender/50 border-orchid/20"
+                />
               </div>
               <div>
                 <Label htmlFor="stock">Stock</Label>
-                <Input id="stock" name="stock" type="number" value={formData.stock} onChange={handleInputChange} required className="bg-lavender/50 border-orchid/20" />
+                <Input
+                  id="stock"
+                  name="stock"
+                  type="number"
+                  value={formData.stock}
+                  onChange={handleInputChange}
+                  required
+                  className="bg-lavender/50 border-orchid/20"
+                />
               </div>
             </div>
             <div>
               <Label htmlFor="category">Category</Label>
-              <Select name="category" onValueChange={handleSelectChange("category")}>
+              <Select
+                name="category"
+                onValueChange={handleSelectChange("category")}
+              >
                 <SelectTrigger className="bg-lavender/50 border-orchid/20">
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
@@ -76,7 +115,10 @@ export default function AddProduct() {
             </div>
             <div>
               <Label htmlFor="status">Status</Label>
-              <Select name="status" onValueChange={handleSelectChange("status")}>
+              <Select
+                name="status"
+                onValueChange={handleSelectChange("status")}
+              >
                 <SelectTrigger className="bg-lavender/50 border-orchid/20">
                   <SelectValue placeholder="Select a status" />
                 </SelectTrigger>
@@ -88,12 +130,23 @@ export default function AddProduct() {
               </Select>
             </div>
             <div className="flex justify-end space-x-4">
-              <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
-              <Button type="submit" className="bg-plum text-pearl hover:bg-orchid">Add Product</Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.back()}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="bg-plum text-pearl hover:bg-orchid"
+              >
+                Add Product
+              </Button>
             </div>
           </form>
         </Card>
       </div>
     </DashboardLayout>
-  )
+  );
 }

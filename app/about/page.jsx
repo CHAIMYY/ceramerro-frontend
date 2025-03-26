@@ -1,54 +1,56 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import Image from "next/image"
-import { useState, useEffect } from "react"
+import { motion } from "framer-motion";
+import Image from "next/image";
+import { useState, useEffect } from "react";
 
 export default function AboutPage() {
-  const [artisans, setArtisans] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [artisans, setArtisans] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-useEffect(() => {
+  useEffect(() => {
     const fetchArtisans = async () => {
       try {
-        setLoading(true)
-        const response = await fetch('http://localhost:3001/api/user/getusers')
-        
+        setLoading(true);
+        const response = await fetch("http://localhost:3001/api/user/getusers");
+
         if (!response.ok) {
-          throw new Error(`API request failed with status ${response.status}`)
+          throw new Error(`API request failed with status ${response.status}`);
         }
-        
-        const data = await response.json()
-        
+
+        const data = await response.json();
+
         // Transform the API data to match our artisan data structure
-        const formattedData = data.map(user => ({
+        const formattedData = data.map((user) => ({
           id: user._id,
           name: `${user.firstname} ${user.lastname}`,
           specialty: user.specialty || "Ceramic Artist",
           category: user.category || "pottery", // Default category if not specified
           location: user.location || "Location not specified",
-          image: user.image || "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-rethaferguson-3817497.jpg-g08fRDNGUnO4iHESPpPuTyvl3LtbdJ.jpeg",
+          image:
+            user.image ||
+            "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pexels-rethaferguson-3817497.jpg-g08fRDNGUnO4iHESPpPuTyvl3LtbdJ.jpeg",
           featured: user.featured || false,
           socialMedia: user.socialMedia || {},
           bio: user.bio || "",
-          gallery: user.gallery || []
-        }))
-        
-        setArtisans(formattedData)
-        setLoading(false)
-      } catch (err) {
-        console.error("Error fetching artisans:", err)
-        setError(err.message)
-        setLoading(false)
-        
-        // Fallback to empty array if API fails
-        setArtisans([])
-      }
-    }
+          gallery: user.gallery || [],
+        }));
 
-    fetchArtisans()
-  }, [])
+        setArtisans(formattedData);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching artisans:", err);
+        setError(err.message);
+        setLoading(false);
+
+        // Fallback to empty array if API fails
+        setArtisans([]);
+      }
+    };
+
+    fetchArtisans();
+  }, []);
 
   return (
     <div className="pt-24 bg-dark-900">
@@ -71,11 +73,16 @@ useEffect(() => {
             transition={{ duration: 0.8 }}
             className="max-w-2xl"
           >
-            <span className="text-accent-green text-sm tracking-wider">OUR STORY</span>
-            <h1 className="text-5xl font-display text-white mt-2 mb-6">About Ceramic Studio</h1>
+            <span className="text-accent-green text-sm tracking-wider">
+              OUR STORY
+            </span>
+            <h1 className="text-5xl font-display text-white mt-2 mb-6">
+              About Ceramic Studio
+            </h1>
             <p className="text-white/70 text-lg">
-              We are a collective of passionate artisans dedicated to preserving the ancient craft of ceramics while
-              embracing contemporary design principles.
+              We are a collective of passionate artisans dedicated to preserving
+              the ancient craft of ceramics while embracing contemporary design
+              principles.
             </p>
           </motion.div>
         </div>
@@ -91,21 +98,30 @@ useEffect(() => {
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
             >
-              <span className="text-accent-green text-sm tracking-wider">ESTABLISHED 2010</span>
-              <h2 className="text-3xl font-display text-white mt-2 mb-6">Our Journey</h2>
+              <span className="text-accent-green text-sm tracking-wider">
+                ESTABLISHED 2010
+              </span>
+              <h2 className="text-3xl font-display text-white mt-2 mb-6">
+                Our Journey
+              </h2>
               <p className="text-white/70 mb-4">
-                Ceramic Studio began as a small workshop in Brooklyn, founded by a group of artists who shared a passion
-                for clay and craftsmanship. What started as a creative outlet quickly evolved into a mission to revive
-                traditional ceramic techniques and bring them into the modern era.
+                Ceramic Studio began as a small workshop in Brooklyn, founded by
+                a group of artists who shared a passion for clay and
+                craftsmanship. What started as a creative outlet quickly evolved
+                into a mission to revive traditional ceramic techniques and
+                bring them into the modern era.
               </p>
               <p className="text-white/70 mb-4">
-                Over the years, we've grown into a community of skilled artisans, each bringing their unique perspective
-                and expertise to our collective. We've expanded our reach while staying true to our founding principles:
-                quality craftsmanship, sustainable practices, and timeless design.
+                Over the years, we've grown into a community of skilled
+                artisans, each bringing their unique perspective and expertise
+                to our collective. We've expanded our reach while staying true
+                to our founding principles: quality craftsmanship, sustainable
+                practices, and timeless design.
               </p>
               <p className="text-white/70">
-                Today, our pieces can be found in homes and galleries around the world, each one telling a story of
-                tradition, innovation, and the human touch.
+                Today, our pieces can be found in homes and galleries around the
+                world, each one telling a story of tradition, innovation, and
+                the human touch.
               </p>
             </motion.div>
 
@@ -131,11 +147,15 @@ useEffect(() => {
       <section className="py-20 bg-dark-900">
         <div className="container mx-auto px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-accent-green text-sm tracking-wider">WHAT WE BELIEVE</span>
-            <h2 className="text-3xl font-display text-white mt-2 mb-6">Our Values</h2>
+            <span className="text-accent-green text-sm tracking-wider">
+              WHAT WE BELIEVE
+            </span>
+            <h2 className="text-3xl font-display text-white mt-2 mb-6">
+              Our Values
+            </h2>
             <p className="text-white/70">
-              At the heart of everything we create are the principles that guide our work and define our approach to
-              ceramics.
+              At the heart of everything we create are the principles that guide
+              our work and define our approach to ceramics.
             </p>
           </div>
 
@@ -169,7 +189,9 @@ useEffect(() => {
                 className="bg-dark-800 p-8 rounded-lg"
               >
                 <div className="text-4xl mb-4">{value.icon}</div>
-                <h3 className="text-xl font-medium text-white mb-4">{value.title}</h3>
+                <h3 className="text-xl font-medium text-white mb-4">
+                  {value.title}
+                </h3>
                 <p className="text-white/70">{value.description}</p>
               </motion.div>
             ))}
@@ -181,17 +203,22 @@ useEffect(() => {
       <section className="py-20 bg-dark-800">
         <div className="container mx-auto px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-accent-green text-sm tracking-wider">THE PEOPLE</span>
-            <h2 className="text-3xl font-display text-white mt-2 mb-6">Meet Our Team</h2>
+            <span className="text-accent-green text-sm tracking-wider">
+              THE PEOPLE
+            </span>
+            <h2 className="text-3xl font-display text-white mt-2 mb-6">
+              Meet Our Team
+            </h2>
             <p className="text-white/70">
-              Our diverse team of artisans brings together decades of experience and a shared passion for ceramic arts.
+              Our diverse team of artisans brings together decades of experience
+              and a shared passion for ceramic arts.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {artisans.map((artisan, index) => (
               <motion.div
-               key={artisan.id}
+                key={artisan.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -200,14 +227,16 @@ useEffect(() => {
               >
                 <div className="relative h-80 mb-4 overflow-hidden rounded-lg">
                   <Image
-                     src={artisan.image || "/placeholder.svg"}
-                     alt={artisan.name}
+                    src={artisan.image || "/placeholder.svg"}
+                    alt={artisan.name}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-dark-900/10 group-hover:bg-dark-900/30 transition-colors duration-300" />
                 </div>
-                <h3 className="text-lg font-medium text-white">{artisan.name}</h3>
+                <h3 className="text-lg font-medium text-white">
+                  {artisan.name}
+                </h3>
                 <p className="text-accent-green">{artisan.specialty}</p>
               </motion.div>
             ))}
@@ -215,6 +244,5 @@ useEffect(() => {
         </div>
       </section>
     </div>
-  )
+  );
 }
-

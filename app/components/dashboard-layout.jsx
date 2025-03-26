@@ -39,12 +39,10 @@ const DashboardLayout = ({ children }) => {
       icon: <ShoppingCart className="h-5 w-5" />,
     },
     {
-      name: "Setings",
-      path: "/seller/setings",
+      name: "Home",
+      path: "/shop",
       icon: <Settings className="h-5 w-5" />,
     },
-    
-   
   ];
 
   return (
@@ -57,7 +55,11 @@ const DashboardLayout = ({ children }) => {
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           className="rounded-full"
         >
-          {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {isSidebarOpen ? (
+            <X className="h-5 w-5" />
+          ) : (
+            <Menu className="h-5 w-5" />
+          )}
         </Button>
       </div>
 

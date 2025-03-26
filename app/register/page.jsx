@@ -8,7 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/components/ui/use-toast";
@@ -24,16 +31,16 @@ export default function RegisterPage() {
     confirmPassword: "",
     shopName: "",
     description: "",
-    phone: ""
+    phone: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -66,15 +73,18 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:3001/api/artisan/register", {
-        firstname: formData.firstname,
-        lastname: formData.lastname,
-        email: formData.email,
-        password: formData.password,
-        shopName: formData.shopName,
-        description: formData.description,
-        phone: formData.phone
-      });
+      const response = await axios.post(
+        "http://localhost:3001/api/artisan/register",
+        {
+          firstname: formData.firstname,
+          lastname: formData.lastname,
+          email: formData.email,
+          password: formData.password,
+          shopName: formData.shopName,
+          description: formData.description,
+          phone: formData.phone,
+        },
+      );
 
       toast({
         title: "Registration successful",
@@ -82,14 +92,15 @@ export default function RegisterPage() {
       });
 
       // Redirect to login page
-      router.push('/login');
+      router.push("/login");
     } catch (err) {
-      console.error('Registration error:', err);
-      const errorMessage = err.response?.data?.message || 
-                         err.response?.data?.error || 
-                         err.message || 
-                         "Failed to register. Please try again.";
-      
+      console.error("Registration error:", err);
+      const errorMessage =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.message ||
+        "Failed to register. Please try again.";
+
       setError(errorMessage);
       toast({
         title: "Registration failed",
@@ -105,8 +116,12 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-pearl flex items-center justify-center p-4">
       <Card className="w-full max-w-lg">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-plum">Artisan Registration</CardTitle>
-          <CardDescription>Create your artisan account to start selling your ceramic creations</CardDescription>
+          <CardTitle className="text-2xl font-bold text-plum">
+            Artisan Registration
+          </CardTitle>
+          <CardDescription>
+            Create your artisan account to start selling your ceramic creations
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -227,8 +242,8 @@ export default function RegisterPage() {
               </Alert>
             )}
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full bg-plum text-pearl hover:bg-orchid transition-colors"
               disabled={loading}
             >
@@ -243,8 +258,8 @@ export default function RegisterPage() {
               Log in here
             </Link>
           </p>
-          <Link 
-            href="/shop" 
+          <Link
+            href="/shop"
             className="text-sm text-plum hover:text-orchid transition-colors"
           >
             Continue shopping as guest

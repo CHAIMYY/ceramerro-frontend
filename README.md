@@ -12,27 +12,21 @@ Ceramerro is a specialized e-commerce platform designed for ceramic artisans to 
   - JWT-based authentication
   - Role-based access (Admin, Artisan, Customer)
   - Secure session management
-  
 - **Artisan Dashboard**
   - Profile creation and management
   - Sales and analytics dashboard
   - Order management interface
-  
 - **Product Showcase**
   - Beautifully designed product listings
   - Filtering and search capabilities
   - Limited editions and collection highlights
   - Ratings and reviews system
-  
 - **E-commerce Functionality**
   - Shopping cart and wishlist
   - Secure checkout with Stripe
- 
-  
 - **Content Management**
   - Blog section with articles and interviews
   - Product care guides and information
-  
 
 ## 🛠️ Tech Stack
 
@@ -52,17 +46,20 @@ Ceramerro is a specialized e-commerce platform designed for ceramic artisans to 
 ### Installation Steps
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/ceramerro/frontend.git
    cd ceramerro-frontend
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Set up environment variables:
+
    ```bash
    cp .env.example .env
    # Edit .env with your API URL and keys
@@ -78,12 +75,12 @@ Ceramerro is a specialized e-commerce platform designed for ceramic artisans to 
 All API requests are managed using Axios. Example configuration:
 
 ```js
-import axios from 'axios';
+import axios from "axios";
 
 const API = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -102,6 +99,7 @@ export default API;
 ### Vercel Deployment
 
 1. Install Vercel CLI:
+
    ```bash
    npm i -g vercel
    ```
@@ -114,6 +112,7 @@ export default API;
 ### Docker Deployment
 
 1. Build the Docker image:
+
    ```bash
    docker build -t ceramerro-frontend .
    ```
@@ -136,4 +135,3 @@ export default API;
 ## 🤝 Support
 
 Made with ❤️ .
-
